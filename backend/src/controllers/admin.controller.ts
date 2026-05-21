@@ -1,10 +1,9 @@
+import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { recalculateMatchPoints } from '../services/scoringEngine.service';
 import { emitScoreUpdate, emitMatchEvent } from '../sockets';
 import { EventType } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

@@ -1,7 +1,6 @@
+import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 export const getAllMatches = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

@@ -1,10 +1,9 @@
+import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { generateToken } from '../auth/jwt';
 import { body, validationResult } from 'express-validator';
 
-const prisma = new PrismaClient();
 
 export const validateRegister = [
   body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name must be 2-50 characters'),

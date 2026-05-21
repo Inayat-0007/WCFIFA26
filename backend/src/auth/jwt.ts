@@ -1,10 +1,9 @@
+import prisma from '../lib/prisma';
 import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 export interface JwtPayload {
   userId: string;

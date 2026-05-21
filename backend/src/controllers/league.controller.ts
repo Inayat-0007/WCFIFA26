@@ -1,8 +1,7 @@
+import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { emitLeaderboardUpdate } from '../sockets';
 
-const prisma = new PrismaClient();
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

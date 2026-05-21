@@ -1,7 +1,7 @@
+import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient, Position } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 export const getAllPlayers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

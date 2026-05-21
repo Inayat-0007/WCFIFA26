@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { emitPointsUpdate, emitLeaderboardUpdate } from '../sockets';
 
-const prisma = new PrismaClient();
 
 const SCORING = {
   GOAL: 10,
@@ -32,23 +31,14 @@ export async function calculatePlayerPoints(matchPlayerId: string): Promise<numb
 }
 
 export async function calculateTeamPoints(fantasyTeamId: string): Promise<number> {
+  // Get the team to find which match it belongs to
   const team = await prisma.fantasyTeam.findUnique({
     where: { id: fantasyTeamId },
-    include: {
-      teamPlayers: {
-        include: {
-          player: {
-            include: {
-              matchPlayers: { where: { matchId: '' } }, // placeholder, we fill below
-            },
-          },
-        },
-      },
-    },
+    select: { id: true, matchId: true, captainId: true, viceCaptainId: true },
   });
   if (!team) return 0;
 
-  // Fetch match players for the right match
+  // Fetch team players with their match-specific stats in a single query
   const teamPlayersWithPoints = await prisma.teamPlayer.findMany({
     where: { fantasyTeamId },
     include: {

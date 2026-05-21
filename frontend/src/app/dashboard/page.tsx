@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Zap, Trophy, Users, ChevronRight, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronRight, Plus } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import { Navbar } from '@/components/ui/Navbar';
@@ -143,34 +144,34 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">My Leagues</h2>
-              <a href="/leagues" className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
+              <Link href="/leagues" className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
                 See all <ChevronRight className="w-3 h-3" />
-              </a>
+              </Link>
             </div>
 
             {myLeagues.length === 0 ? (
               <div className="glass rounded-2xl p-6 text-center">
                 <div className="text-4xl mb-3">🏆</div>
                 <p className="text-gray-400 text-sm mb-4">No leagues yet! Create or join one.</p>
-                <a
+                <Link
                   href="/leagues"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white"
                   style={{ background: 'linear-gradient(135deg, #DC143C, #a01030)' }}
                 >
                   <Plus className="w-4 h-4" /> Join a League
-                </a>
+                </Link>
               </div>
             ) : (
               <div className="space-y-3">
                 {myLeagues.slice(0, 3).map((league) => (
-                  <a key={league.id} href={`/leagues/${league.id}`}
+                  <Link key={league.id} href={`/leagues/${league.id}`}
                     className="flex items-center justify-between glass rounded-2xl p-4 hover:border-primary-500/20 transition-all card-hover">
                     <div>
                       <p className="font-semibold text-white">{league.name}</p>
                       <p className="text-xs text-gray-500">{league._count?.members || 0}/{league.maxMembers} members</p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-600" />
-                  </a>
+                  </Link>
                 ))}
               </div>
             )}
@@ -184,9 +185,9 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Top Players</h2>
-              <a href="/leaderboard" className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
+              <Link href="/leaderboard" className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
                 Full Rankings <ChevronRight className="w-3 h-3" />
-              </a>
+              </Link>
             </div>
 
             <div className="glass rounded-2xl overflow-hidden">
@@ -222,9 +223,9 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Upcoming Matches</h2>
-              <a href="/matches" className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
+              <Link href="/matches" className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
                 All matches <ChevronRight className="w-3 h-3" />
-              </a>
+              </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {upcomingMatches.slice(1, 7).map((m) => (
