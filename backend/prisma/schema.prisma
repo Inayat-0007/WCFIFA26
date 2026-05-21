@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String?
+  avatar      String?
+  googleId    String?  @unique
+  isAdmin     Boolean  @default(false)
+  totalPoints Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownedLeagues   League[]
+  memberships    LeagueMember[]
+  fantasyTeams   FantasyTeam[]
+  notifications  Notification[]
+}
+
+model League {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique
+  ownerId    String
+  maxMembers Int      @default(10)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  owner   User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members LeagueMember[]
+}
+
+model LeagueMember {
+  id       String   @id @default(cuid())
+  leagueId String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, userId])
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  homeTeam    String
+  awayTeam    String
+  homeFlag    String?
+  awayFlag    String?
+  group       String?
+  round       String      @default("Group Stage")
+  kickoffTime DateTime
+  venue       String?
+  city        String?
+  status      MatchStatus @default(UPCOMING)
+  homeScore   Int         @default(0)
+  awayScore   Int         @default(0)
+  minute      Int?
+  externalId  String?     @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  events       MatchEvent[]
+  fantasyTeams FantasyTeam[]
+  matchPlayers MatchPlayer[]
+}
+
+model Player {
+  id          String   @id @default(cuid())
+  name        String
+  displayName String?
+  country     String
+  countryCode String?
+  position    Position
+  image       String?
+  price       Float    @default(8.0)
+  basePoints  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teamPlayers  TeamPlayer[]
+  matchPlayers MatchPlayer[]
+}
+
+model MatchPlayer {
+  id            String  @id @default(cuid())
+  matchId       String
+  playerId      String
+  fantasyPoints Int     @default(0)
+  goals         Int     @default(0)
+  assists       Int     @default(0)
+  yellowCards   Int     @default(0)
+  redCards      Int     @default(0)
+  cleanSheet    Boolean @default(false)
+  penaltyMisses Int     @default(0)
+  minutesPlayed Int     @default(0)
+
+  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, playerId])
+}
+
+model FantasyTeam {
+  id            String   @id @default(cuid())
+  userId        String
+  matchId       String
+  captainId     String
+  viceCaptainId String
+  totalPoints   Int      @default(0)
+  budgetUsed    Float    @default(0)
+  isLocked      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match       Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamPlayers TeamPlayer[]
+
+  @@unique([userId, matchId])
+}
+
+model TeamPlayer {
+  id            String @id @default(cuid())
+  fantasyTeamId String
+  playerId      String
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([fantasyTeamId, playerId])
+}
+
+model MatchEvent {
+  id        String    @id @default(cuid())
+  matchId   String
+  playerId  String?
+  type      EventType
+  minute    Int
+  detail    String?
+  createdAt DateTime  @default(now())
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String   @default("info")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum MatchStatus {
+  UPCOMING
+  LIVE
+  COMPLETED
+  POSTPONED
+}
+
+enum Position {
+  GK
+  DEF
+  MID
+  FWD
+}
+
+enum EventType {
+  GOAL
+  ASSIST
+  YELLOW_CARD
+  RED_CARD
+  PENALTY_MISS
+  CLEAN_SHEET
+  SUBSTITUTION
+}
