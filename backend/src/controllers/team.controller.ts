@@ -37,6 +37,22 @@ export const saveTeam = async (req: Request, res: Response, next: NextFunction):
       res.status(404).json({ success: false, message: 'Match not found' });
       return;
     }
+
+    // ── CRITICAL: Time-based lock ─────────────────────────────────────────────
+    // This is the primary guard. It locks the team the moment the real-world
+    // kickoff time passes, regardless of whether the admin has toggled the
+    // match status to LIVE yet. Without this, there's a race condition window
+    // between actual kickoff and the status change.
+    if (new Date() >= new Date(match.kickoffTime)) {
+      res.status(400).json({
+        success: false,
+        message: 'Team locked — match has already kicked off',
+        lockedAt: match.kickoffTime,
+      });
+      return;
+    }
+
+    // Status-based locks (belt-and-suspenders — covers manual status overrides)
     if (match.status === 'COMPLETED') {
       res.status(400).json({ success: false, message: 'Cannot change team — match is completed' });
       return;

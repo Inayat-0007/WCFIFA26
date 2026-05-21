@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useRef, useState, useCallback, ReactNode } from 'react';
-import { getSocket, connectSocket, disconnectSocket } from '@/lib/socket';
+import { getSocket, connectSocket, disconnectSocket, updateSocketAuth } from '@/lib/socket';
+import { useAuth } from '@/context/AuthContext';
 import type { Socket } from 'socket.io-client';
 
 interface SocketContextType {
@@ -11,7 +12,6 @@ interface SocketContextType {
   leaveMatch: (matchId: string) => void;
   joinLeague: (leagueId: string) => void;
   leaveLeague: (leagueId: string) => void;
-  joinUser: (userId: string) => void;
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -19,20 +19,39 @@ const SocketContext = createContext<SocketContextType | null>(null);
 export function SocketProvider({ children }: { children: ReactNode }) {
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
+  const { token } = useAuth();
 
   useEffect(() => {
-    const s = getSocket();
+    // Only connect when we have a valid auth token
+    if (!token) {
+      // User logged out — disconnect cleanly
+      disconnectSocket();
+      setConnected(false);
+      return;
+    }
+
+    const s = getSocket(token);
     socketRef.current = s;
-    connectSocket();
+    connectSocket(token);
 
     s.on('connect', () => setConnected(true));
     s.on('disconnect', () => setConnected(false));
+    s.on('connect_error', (err) => {
+      console.error('[Socket.IO] Connection error:', err.message);
+      setConnected(false);
+    });
 
     return () => {
       s.off('connect');
       s.off('disconnect');
+      s.off('connect_error');
     };
-  }, []);
+  }, [token]);
+
+  // When token changes (e.g. refresh), update the socket auth
+  useEffect(() => {
+    updateSocketAuth(token);
+  }, [token]);
 
   const joinMatch = useCallback((matchId: string) => {
     socketRef.current?.emit('join:match', matchId);
@@ -50,15 +69,14 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socketRef.current?.emit('leave:league', leagueId);
   }, []);
 
-  const joinUser = useCallback((userId: string) => {
-    socketRef.current?.emit('join:user', userId);
-  }, []);
+  // NOTE: joinUser is removed — the server now auto-joins the user's
+  // private notification room from the verified JWT payload.
 
   return (
     <SocketContext.Provider value={{
       socket: socketRef.current,
       connected,
-      joinMatch, leaveMatch, joinLeague, leaveLeague, joinUser,
+      joinMatch, leaveMatch, joinLeague, leaveLeague,
     }}>
       {children}
     </SocketContext.Provider>
