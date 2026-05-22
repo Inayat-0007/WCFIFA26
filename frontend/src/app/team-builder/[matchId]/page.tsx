@@ -107,6 +107,8 @@ export default function TeamBuilderPage() {
   const [loading, setLoading] = useState(true);
   const [formation, setFormation] = useState<Formation>('4-4-2');
   const [showCeremonyModal, setShowCeremonyModal] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/login');
@@ -244,7 +246,7 @@ export default function TeamBuilderPage() {
         viceCaptainId: vcId,
       });
       toast.success('Fantasy Squad Saved Successfully! 🏆');
-      router.push('/dashboard');
+      router.push(`/matches/${matchId}?tab=squad`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to save team';
       toast.error(msg);
@@ -354,6 +356,12 @@ export default function TeamBuilderPage() {
             <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl" style={{ minHeight: '520px' }}>
               <div className="absolute inset-0 pitch-bg opacity-90" />
               
+              {/* Glowing Red Vignette on Drag */}
+              <div className={cn(
+                "absolute inset-0 border-2 transition-all duration-300 pointer-events-none z-20 rounded-3xl",
+                isDragging ? "border-red-500/50 shadow-[inset_0_0_40px_rgba(239,68,68,0.25)]" : "border-transparent"
+              )} />
+
               {/* Pitch Markings */}
               <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg">
                 <rect x="15" y="15" width="370" height="520" fill="none" stroke="white" strokeWidth="2.5" />
@@ -380,6 +388,21 @@ export default function TeamBuilderPage() {
                 <Info className="w-3 h-3 text-[#DC143C]" /> Drag jersey off pitch to discard
               </div>
 
+              {/* Drag Trash Zone HUD */}
+              <AnimatePresence>
+                {isDragging && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15, x: '-50%' }}
+                    animate={{ opacity: 1, y: 0, x: '-50%' }}
+                    exit={{ opacity: 0, y: 15, x: '-50%' }}
+                    className="absolute bottom-6 left-1/2 z-30 bg-red-600/90 backdrop-blur-md px-6 py-2 rounded-2xl border border-red-500 shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center gap-2 text-xs font-black text-white pointer-events-none uppercase tracking-widest"
+                  >
+                    <Trash2 className="w-4 h-4 animate-bounce" />
+                    Drop here or drag off pitch to discard
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Rows inside Pitch */}
               <div className="relative z-10 flex flex-col justify-between py-12 px-4 h-full min-h-[520px]">
                 
@@ -392,6 +415,10 @@ export default function TeamBuilderPage() {
                   onAdd={() => { setFilter('FWD'); setShowDrawer(true); }}
                   captainId={captainId}
                   vcId={vcId}
+                  homeTeam={match?.homeTeam || ''}
+                  awayTeam={match?.awayTeam || ''}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
                 />
 
                 {/* Midfielders (MID) */}
@@ -403,6 +430,10 @@ export default function TeamBuilderPage() {
                   onAdd={() => { setFilter('MID'); setShowDrawer(true); }}
                   captainId={captainId}
                   vcId={vcId}
+                  homeTeam={match?.homeTeam || ''}
+                  awayTeam={match?.awayTeam || ''}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
                 />
 
                 {/* Defenders (DEF) */}
@@ -414,6 +445,10 @@ export default function TeamBuilderPage() {
                   onAdd={() => { setFilter('DEF'); setShowDrawer(true); }}
                   captainId={captainId}
                   vcId={vcId}
+                  homeTeam={match?.homeTeam || ''}
+                  awayTeam={match?.awayTeam || ''}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
                 />
 
                 {/* Goalkeeper (GK) */}
@@ -425,6 +460,10 @@ export default function TeamBuilderPage() {
                   onAdd={() => { setFilter('GK'); setShowDrawer(true); }}
                   captainId={captainId}
                   vcId={vcId}
+                  homeTeam={match?.homeTeam || ''}
+                  awayTeam={match?.awayTeam || ''}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
                 />
 
               </div>
@@ -835,7 +874,11 @@ function PitchRow({
   onRemove, 
   onAdd, 
   captainId, 
-  vcId 
+  vcId,
+  homeTeam,
+  awayTeam,
+  onDragStart,
+  onDragEnd
 }: {
   players: SelectedPlayer[]; 
   limit: number; 
@@ -844,9 +887,24 @@ function PitchRow({
   onAdd: () => void;
   captainId: string;
   vcId: string;
+  homeTeam: string;
+  awayTeam: string;
+  onDragStart: () => void;
+  onDragEnd: () => void;
 }) {
   const emptyCount = Math.max(0, limit - players.length);
   
+  // Custom neon borders for different positions in empty slots
+  const getSlotStyles = (pos: Position) => {
+    const styles: Record<Position, string> = {
+      GK: 'border-amber-500/20 text-amber-500/40 hover:border-amber-500/60 hover:text-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-amber-500/[0.02]',
+      DEF: 'border-blue-500/20 text-blue-500/40 hover:border-blue-500/60 hover:text-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.25)] bg-blue-500/[0.02]',
+      MID: 'border-emerald-500/20 text-emerald-500/40 hover:border-emerald-500/60 hover:text-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.25)] bg-emerald-500/[0.02]',
+      FWD: 'border-rose-500/20 text-rose-500/40 hover:border-rose-500/60 hover:text-rose-400 hover:shadow-[0_0_15px_rgba(244,63,94,0.25)] bg-rose-500/[0.02]',
+    };
+    return styles[pos] || 'border-white/10 text-white/30';
+  };
+
   return (
     <div className="flex flex-col items-center gap-1">
       {/* Position Header Label */}
@@ -863,6 +921,20 @@ function PitchRow({
             const isCaptain = captainId === player.id;
             const isVC = vcId === player.id;
 
+            // Determinate jersey styling
+            const isHome = player.country === homeTeam;
+            const primaryColor = isHome ? '#DC143C' : '#00C9FF';
+            const secondaryColor = isHome ? '#FFD700' : '#92FE9D';
+            const finalPrimary = player.position === 'GK' ? '#FF9F0A' : primaryColor;
+            const finalSecondary = player.position === 'GK' ? '#FFD700' : secondaryColor;
+            
+            // Deterministic shirt number
+            let hash = 0;
+            for (let i = 0; i < player.name.length; i++) {
+              hash = player.name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const jerseyNum = (Math.abs(hash) % 22) + 1;
+
             return (
               <motion.div
                 key={player.id}
@@ -876,53 +948,87 @@ function PitchRow({
                 drag
                 dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
                 dragElastic={0.4}
+                onDragStart={() => {
+                  playSound('tick');
+                  onDragStart();
+                }}
                 onDragEnd={(event, info) => {
+                  onDragEnd();
                   const threshold = 70;
                   if (Math.abs(info.offset.x) > threshold || Math.abs(info.offset.y) > threshold) {
                     onRemove(player.id);
+                  } else {
+                    playSound('pop'); // snap back sound
                   }
+                }}
+                whileDrag={{ 
+                  scale: 1.15, 
+                  zIndex: 50, 
+                  filter: 'drop-shadow(0 15px 15px rgba(220, 20, 60, 0.45))' 
                 }}
               >
                 
-                {/* Floating Jersey / Badge */}
-                <div 
-                  className={cn(
-                    'w-13 h-13 md:w-14 md:h-14 rounded-full flex flex-col items-center justify-center text-xs font-black relative shadow-lg transition-transform group-hover:scale-110 border-2 select-none bg-black/70',
-                    isCaptain 
-                      ? 'border-[#FFD700] shadow-[0_0_12px_rgba(255,215,0,0.5)]' 
-                      : isVC 
-                        ? 'border-gray-300 shadow-[0_0_12px_rgba(220,220,220,0.4)]' 
-                        : 'border-white/20 hover:border-white/50'
-                  )}
-                >
-                  <span className="text-xl leading-none">{getFlagByCountry(player.country)}</span>
+                {/* SVG Soccer Jersey */}
+                <div className="relative flex items-center justify-center">
                   
                   {/* Captain Badge Indicator */}
                   {isCaptain && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center text-[9px] font-black text-black border border-black shadow">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center text-[9px] font-black text-black border border-black shadow z-20">
                       C
                     </div>
                   )}
 
                   {/* Vice-Captain Badge Indicator */}
                   {isVC && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-[9px] font-black text-black border border-black shadow">
-                      V
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-[9px] font-black text-black border border-black shadow z-20">
+                      VC
                     </div>
                   )}
 
-                  {/* Tiny position badge */}
-                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-black/80 px-1 border border-white/10 rounded text-[7px] text-gray-400 scale-90 uppercase">
-                    {player.country.substring(0, 3)}
+                  {/* SVG Render */}
+                  <div className="relative">
+                    <svg className={cn(
+                      "w-12 h-12 md:w-14 md:h-14 drop-shadow-md transition-transform group-hover:scale-110",
+                      isCaptain && "filter drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]",
+                      isVC && "filter drop-shadow-[0_0_6px_rgba(200,200,200,0.5)]"
+                    )} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path 
+                        d="M 20 28 L 32 15 L 43 19 L 50 15 L 57 19 L 68 15 L 80 28 L 73 38 L 66 33 L 66 85 L 34 85 L 34 33 L 27 38 Z" 
+                        fill={finalPrimary} 
+                        stroke={isCaptain ? '#FFD700' : isVC ? '#d1d5db' : '#ffffff'} 
+                        strokeWidth="4"
+                        strokeLinejoin="round" 
+                      />
+                      <path d="M 43 19 Q 50 26 57 19" fill="none" stroke={finalSecondary} strokeWidth="3" />
+                      <path d="M 40 33 L 40 85 M 50 26 L 50 85 M 60 33 L 60 85" stroke={finalSecondary} strokeWidth="2.5" opacity="0.3" />
+                      <text 
+                        x="50" 
+                        y="60" 
+                        fill="#ffffff" 
+                        fontSize="24" 
+                        fontWeight="900" 
+                        textAnchor="middle" 
+                        fontFamily="system-ui, -apple-system, sans-serif"
+                      >
+                        {jerseyNum}
+                      </text>
+                    </svg>
                   </div>
+
+                  {/* Country Flag Badge overlay */}
+                  <div className="absolute -bottom-1 -left-1 bg-black/60 px-1 py-0.5 rounded text-[8px] flex items-center gap-0.5 border border-white/10 z-20">
+                    <span>{getFlagByCountry(player.country)}</span>
+                    <span className="text-[7px] text-gray-300 font-extrabold uppercase">{player.country.substring(0, 3)}</span>
+                  </div>
+
                 </div>
 
                 {/* Player details */}
-                <div className="mt-2.5 text-center leading-none pointer-events-none select-none max-w-[65px]">
+                <div className="mt-2 text-center leading-none pointer-events-none select-none max-w-[65px]">
                   <p className="text-[9px] md:text-[10px] text-white font-extrabold truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {player.name.split(' ').pop()}
                   </p>
-                  <p className="text-[8px] text-[#FFD700] font-semibold mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                  <p className="text-[8px] text-[#FFD700] font-bold mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {player.price} Cr
                   </p>
                 </div>
@@ -930,7 +1036,7 @@ function PitchRow({
                 {/* Hover Delete Action Button */}
                 <button
                   onClick={() => onRemove(player.id)}
-                  className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-red-600/90 hover:bg-red-500 border border-white/10 flex items-center justify-center text-[9px] font-bold text-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-red-600/90 hover:bg-red-500 border border-white/10 flex items-center justify-center text-[9px] font-bold text-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-30"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -945,13 +1051,17 @@ function PitchRow({
           <motion.button
             key={`empty-${idx}`}
             onClick={onAdd}
-            className="w-13 h-13 md:w-14 md:h-14 rounded-full flex items-center justify-center border-2 border-dashed border-white/10 bg-black/20 hover:bg-black/40 hover:border-white/30 text-white/30 hover:text-white/60 transition-all shadow-inner group/btn"
+            className={cn(
+              "w-12 h-12 md:w-14 md:h-14 rounded-full flex flex-col items-center justify-center border-2 border-dashed transition-all shadow-inner group/btn relative backdrop-blur-sm",
+              getSlotStyles(position)
+            )}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.7 }}
-            whileHover={{ scale: 1.05, opacity: 1 }}
+            whileHover={{ scale: 1.08, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            <span className="text-base font-extrabold transition-transform group-hover/btn:scale-115 pointer-events-none">+</span>
+            <span className="text-sm font-extrabold transition-transform group-hover/btn:scale-115 pointer-events-none">+</span>
+            <span className="text-[7px] font-black uppercase pointer-events-none tracking-tighter opacity-60 group-hover/btn:opacity-100">{position}</span>
           </motion.button>
         ))}
 

@@ -39,14 +39,19 @@ export function MatchCard({ match, showPickButton = true, compact = false }: Mat
         </div>
       )}
 
-      {/* Group/Round badge */}
-      {match.group && (
-        <div className="mb-3">
+      {/* Group/Round badge & Joined Status */}
+      <div className="flex items-center justify-between mb-3">
+        {match.group ? (
           <span className="text-[10px] font-semibold text-gray-500 tracking-widest uppercase">
             Group {match.group} · {match.round}
           </span>
-        </div>
-      )}
+        ) : <span />}
+        {match.hasUserTeam && (
+          <span className="text-[9px] font-black bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-[0_0_8px_rgba(16,185,129,0.1)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> SQUAD CREATED
+          </span>
+        )}
+      </div>
 
       {/* Teams and Score */}
       <div className="flex items-center justify-between gap-3">
@@ -97,23 +102,39 @@ export function MatchCard({ match, showPickButton = true, compact = false }: Mat
       {!compact && (
         <div className="mt-3 flex items-center justify-between">
           <span className="text-[11px] text-gray-600">{formatMatchTime(match.kickoffTime)}</span>
-          {isUpcoming && showPickButton && (
-            <Link
-              href={`/team-builder/${match.id}`}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all duration-200 hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #DC143C, #a01030)' }}
-            >
-              Pick Team →
-            </Link>
-          )}
-          {(isLive || isCompleted) && (
-            <Link
-              href={`/matches/${match.id}`}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white glass transition-all"
-            >
-              View →
-            </Link>
-          )}
+          <div className="flex gap-2 items-center">
+            {isUpcoming && showPickButton && (
+              <>
+                {match.hasUserTeam && (
+                  <Link
+                    href={`/matches/${match.id}?tab=squad`}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-300 hover:text-white glass transition-all"
+                  >
+                    View Team 🛡️
+                  </Link>
+                )}
+                <Link
+                  href={`/team-builder/${match.id}`}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-105",
+                    match.hasUserTeam 
+                      ? "bg-gradient-to-r from-amber-500 to-amber-700 text-white shadow-[0_2px_10px_rgba(245,158,11,0.2)]"
+                      : "bg-gradient-to-r from-[#DC143C] to-[#a01030] text-white"
+                  )}
+                >
+                  {match.hasUserTeam ? 'Edit Team ✏️' : 'Pick Team →'}
+                </Link>
+              </>
+            )}
+            {(isLive || isCompleted) && (
+              <Link
+                href={`/matches/${match.id}${match.hasUserTeam ? '?tab=squad' : ''}`}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300 hover:text-white glass transition-all"
+              >
+                {match.hasUserTeam ? 'View Points 📈' : 'View Stats 📊'}
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </motion.div>

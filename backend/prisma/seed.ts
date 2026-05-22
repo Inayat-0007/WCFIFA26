@@ -352,6 +352,34 @@ const groupMatches = [
   { home: 'Senegal', away: 'Morocco', group: 'H', daysOffset: 8 },
   { home: 'Senegal', away: 'Colombia', group: 'H', daysOffset: 12 },
   { home: 'Morocco', away: 'Croatia', group: 'H', daysOffset: 12 },
+  // Group I
+  { home: 'South Korea', away: 'Ukraine', group: 'I', daysOffset: 4 },
+  { home: 'Venezuela', away: 'Cuba', group: 'I', daysOffset: 4 },
+  { home: 'South Korea', away: 'Venezuela', group: 'I', daysOffset: 8 },
+  { home: 'Ukraine', away: 'Cuba', group: 'I', daysOffset: 8 },
+  { home: 'Ukraine', away: 'Venezuela', group: 'I', daysOffset: 12 },
+  { home: 'Cuba', away: 'South Korea', group: 'I', daysOffset: 12 },
+  // Group J
+  { home: 'Denmark', away: 'Serbia', group: 'J', daysOffset: 4 },
+  { home: 'Tunisia', away: 'Bolivia', group: 'J', daysOffset: 4 },
+  { home: 'Denmark', away: 'Tunisia', group: 'J', daysOffset: 8 },
+  { home: 'Serbia', away: 'Bolivia', group: 'J', daysOffset: 8 },
+  { home: 'Serbia', away: 'Tunisia', group: 'J', daysOffset: 12 },
+  { home: 'Bolivia', away: 'Denmark', group: 'J', daysOffset: 12 },
+  // Group K
+  { home: 'Iran', away: 'Ivory Coast', group: 'K', daysOffset: 5 },
+  { home: 'Wales', away: 'Paraguay', group: 'K', daysOffset: 5 },
+  { home: 'Iran', away: 'Wales', group: 'K', daysOffset: 9 },
+  { home: 'Ivory Coast', away: 'Paraguay', group: 'K', daysOffset: 9 },
+  { home: 'Ivory Coast', away: 'Wales', group: 'K', daysOffset: 13 },
+  { home: 'Paraguay', away: 'Iran', group: 'K', daysOffset: 13 },
+  // Group L
+  { home: 'Turkey', away: 'Poland', group: 'L', daysOffset: 5 },
+  { home: 'Ghana', away: 'Honduras', group: 'L', daysOffset: 5 },
+  { home: 'Turkey', away: 'Ghana', group: 'L', daysOffset: 9 },
+  { home: 'Poland', away: 'Honduras', group: 'L', daysOffset: 9 },
+  { home: 'Poland', away: 'Ghana', group: 'L', daysOffset: 13 },
+  { home: 'Honduras', away: 'Turkey', group: 'L', daysOffset: 13 },
 ];
 
 interface NamePool {

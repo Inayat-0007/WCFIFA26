@@ -58,6 +58,7 @@ export interface Match {
   minute?: number;
   events?: MatchEvent[];
   matchPlayers?: MatchPlayer[];
+  hasUserTeam?: boolean;
   _count?: { events: number; fantasyTeams: number };
 }
 

@@ -144,7 +144,7 @@ export const getMyTeam = async (req: Request, res: Response, next: NextFunction)
           include: {
             player: {
               include: {
-                matchPlayers: { where: { matchId }, select: { fantasyPoints: true, goals: true, assists: true } },
+                matchPlayers: { where: { matchId } },
               },
             },
           },

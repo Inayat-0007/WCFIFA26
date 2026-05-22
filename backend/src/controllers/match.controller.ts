@@ -25,9 +25,23 @@ export const getAllMatches = async (req: Request, res: Response, next: NextFunct
       prisma.match.count({ where }),
     ]);
 
+    let userMatchIds: string[] = [];
+    if (req.user) {
+      const userTeams = await prisma.fantasyTeam.findMany({
+        where: { userId: req.user.id, matchId: { in: matches.map((m) => m.id) } },
+        select: { matchId: true },
+      });
+      userMatchIds = userTeams.map((ut) => ut.matchId);
+    }
+
+    const dataWithTeam = matches.map((m) => ({
+      ...m,
+      hasUserTeam: userMatchIds.includes(m.id),
+    }));
+
     res.json({
       success: true,
-      data: matches,
+      data: dataWithTeam,
       pagination: {
         total,
         page: parseInt(page as string),
@@ -59,7 +73,22 @@ export const getMatch = async (req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    res.json({ success: true, data: match });
+    let hasUserTeam = false;
+    if (req.user) {
+      const userTeam = await prisma.fantasyTeam.findUnique({
+        where: { userId_matchId: { userId: req.user.id, matchId: id } },
+        select: { id: true },
+      });
+      hasUserTeam = !!userTeam;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        ...match,
+        hasUserTeam,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -74,7 +103,22 @@ export const getLiveMatches = async (req: Request, res: Response, next: NextFunc
       },
       orderBy: { kickoffTime: 'asc' },
     });
-    res.json({ success: true, data: matches });
+
+    let userMatchIds: string[] = [];
+    if (req.user) {
+      const userTeams = await prisma.fantasyTeam.findMany({
+        where: { userId: req.user.id, matchId: { in: matches.map((m) => m.id) } },
+        select: { matchId: true },
+      });
+      userMatchIds = userTeams.map((ut) => ut.matchId);
+    }
+
+    const dataWithTeam = matches.map((m) => ({
+      ...m,
+      hasUserTeam: userMatchIds.includes(m.id),
+    }));
+
+    res.json({ success: true, data: dataWithTeam });
   } catch (err) {
     next(err);
   }
@@ -87,7 +131,22 @@ export const getUpcomingMatches = async (req: Request, res: Response, next: Next
       orderBy: { kickoffTime: 'asc' },
       take: 10,
     });
-    res.json({ success: true, data: matches });
+
+    let userMatchIds: string[] = [];
+    if (req.user) {
+      const userTeams = await prisma.fantasyTeam.findMany({
+        where: { userId: req.user.id, matchId: { in: matches.map((m) => m.id) } },
+        select: { matchId: true },
+      });
+      userMatchIds = userTeams.map((ut) => ut.matchId);
+    }
+
+    const dataWithTeam = matches.map((m) => ({
+      ...m,
+      hasUserTeam: userMatchIds.includes(m.id),
+    }));
+
+    res.json({ success: true, data: dataWithTeam });
   } catch (err) {
     next(err);
   }
