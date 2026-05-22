@@ -354,6 +354,84 @@ const groupMatches = [
   { home: 'Morocco', away: 'Croatia', group: 'H', daysOffset: 12 },
 ];
 
+interface NamePool {
+  first: string[];
+  last: string[];
+}
+
+const namePools: Record<string, NamePool> = {
+  spanish: {
+    first: ['José', 'Luis', 'Carlos', 'Juan', 'Diego', 'Mateo', 'Santiago', 'Sebastián', 'Alejandro', 'Gabriel', 'Daniel', 'Manuel', 'Fernando', 'Rafael', 'Javier', 'Andrés', 'Hugo', 'Lucas', 'Enzo', 'Agustín'],
+    last: ['Rodríguez', 'González', 'Gómez', 'Fernández', 'López', 'Díaz', 'Martínez', 'Pérez', 'García', 'Sánchez', 'Romero', 'Álvarez', 'Torres', 'Ruiz', 'Ramírez', 'Flores', 'Acosta', 'Benítez', 'Medina', 'Herrera']
+  },
+  brazil: {
+    first: ['Thiago', 'Matheus', 'Lucas', 'Felipe', 'Guilherme', 'Gabriel', 'Gustavo', 'Pedro', 'João', 'Vitor', 'Arthur', 'Bruno', 'Caio', 'Daniel', 'Eduardo', 'Henrique', 'Igor', 'Leonardo', 'Rafael', 'Rodrigo'],
+    last: ['Silva', 'Santos', 'Sousa', 'Oliveira', 'Pereira', 'Lima', 'Carvalho', 'Costa', 'Ribeiro', 'Almeida', 'Nascimento', 'Alves', 'Barbosa', 'Cardoso', 'Gomes', 'Martins', 'Melo', 'Pinto', 'Rocha', 'Teixeira']
+  },
+  english: {
+    first: ['John', 'James', 'Tyler', 'Brandon', 'Christian', 'Jordan', 'Alex', 'Zachary', 'Mason', 'Ethan', 'Connor', 'Dylan', 'Cameron', 'Kyle', 'Cody', 'Liam', 'Noah', 'Oliver', 'Harry', 'Jack'],
+    last: ['Miller', 'Davis', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Robinson', 'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Green']
+  },
+  european: {
+    first: ['Thomas', 'Andreas', 'Stefan', 'Lucas', 'Jonas', 'Maximilian', 'Arthur', 'Leo', 'Pierre', 'Hugo', 'Marco', 'Luca', 'Alessandro', 'Frenkie', 'Sven', 'Hans', 'Jürgen', 'Marc', 'Lars', 'Nils'],
+    last: ['Müller', 'Weber', 'Becker', 'Hoffmann', 'Schulz', 'Dupont', 'Martin', 'Dubois', 'Leroy', 'Rossi', 'Bianchi', 'Ferrari', 'de Jong', 'van Dijk', 'Jansen', 'Schmid', 'Meier', 'Schneider', 'Fischer', 'Meyer']
+  },
+  easternEurope: {
+    first: ['Ivan', 'Luka', 'Marko', 'Andrej', 'Nikola', 'Dragan', 'Sergej', 'Mateo', 'Piotr', 'Jan', 'Oleksandr', 'Dmytro', 'Yaroslav', 'Taras', 'Volodymyr', 'Michal', 'Krzysztof', 'Tomasz', 'Pawel', 'Grzegorz'],
+    last: ['Modrić', 'Kovačić', 'Brozović', 'Perišić', 'Vlahović', 'Mitrović', 'Tadić', 'Lewandowski', 'Zieliński', 'Shevchenko', 'Zinchenko', 'Kovalenko', 'Szymanski', 'Kozlowski', 'Kaminski', 'Stepancic', 'Pavlovic']
+  },
+  african: {
+    first: ['Sadio', 'Victor', 'Wilfried', 'Alex', 'Youssef', 'Sofyan', 'Hakim', 'Achraf', 'Kofi', 'Kwame', 'Moussa', 'Didier', 'Idrissa', 'Samuel', 'Emmanuel', 'Aboubakar', 'Chancel', 'Eric', 'Habib', 'Karl'],
+    last: ['Mané', 'Osimhen', 'Ndidi', 'Iwobi', 'Ziyech', 'Hakimi', 'Amrabat', 'Koulibaly', 'Mendy', 'Kessié', 'Pépé', 'Drogba', 'Mensah', 'Owusu', 'Gueye', 'Diallo', 'Sarr', 'Sow', 'Barrow', 'Touré']
+  },
+  asian: {
+    first: ['Takumi', 'Wataru', 'Ritsu', 'Maya', 'Min-jun', 'Ji-hoon', 'Seung-gyu', 'Min-jae', 'Ali', 'Tariq', 'Sardar', 'Salem', 'Saleh', 'Hiroto', 'Daiki', 'Yuki', 'Kento', 'Sho', 'Ryota', 'Sota'],
+    last: ['Tanaka', 'Sato', 'Watanabe', 'Ito', 'Kim', 'Lee', 'Park', 'Choi', 'Al-Dawsari', 'Al-Shehri', 'Al-Owais', 'Taremi', 'Azmoun', 'Jahanbakhsh', 'Haddad', 'Takahashi', 'Suzuki', 'Nakamura', 'Kobayashi', 'Yamamoto']
+  }
+};
+
+function getRegionForCountry(countryName: string, countryCode: string): string {
+  const c = countryName.toLowerCase();
+  if (c === 'brazil') return 'brazil';
+  if (['argentina', 'chile', 'peru', 'costa rica', 'spain', 'uruguay', 'colombia', 'venezuela', 'cuba', 'bolivia', 'paraguay', 'ecuador', 'honduras', 'mexico', 'panama'].includes(c)) return 'spanish';
+  if (['united states', 'australia', 'england', 'new zealand', 'wales'].includes(c)) return 'english';
+  if (['croatia', 'ukraine', 'serbia', 'poland'].includes(c)) return 'easternEurope';
+  if (['cameroon', 'algeria', 'senegal', 'nigeria', 'morocco', 'tunisia', 'ivory coast', 'ghana'].includes(c)) return 'african';
+  if (['japan', 'indonesia', 'iraq', 'saudi arabia', 'south korea', 'iran'].includes(c)) return 'asian';
+  return 'european';
+}
+
+const usedNames = new Set<string>();
+
+function generateUniqueName(country: string, countryCode: string): string {
+  const region = getRegionForCountry(country, countryCode);
+  const pool = namePools[region] || namePools['european'];
+  
+  let attempts = 0;
+  while (attempts < 200) {
+    const first = pool.first[Math.floor(Math.random() * pool.first.length)];
+    const last = pool.last[Math.floor(Math.random() * pool.last.length)];
+    const fullName = `${first} ${last}`;
+    if (!usedNames.has(fullName.toLowerCase())) {
+      usedNames.add(fullName.toLowerCase());
+      return fullName;
+    }
+    attempts++;
+  }
+  return `${country} Player ${Math.floor(Math.random() * 1000) + 1}`;
+}
+
+function getPriceForPosition(position: Position): number {
+  const priceRanges: Record<Position, number[]> = {
+    GK: [6.5, 7.0, 7.5, 8.0],
+    DEF: [6.5, 7.0, 7.5, 8.0, 8.5],
+    MID: [7.0, 7.5, 8.0, 8.5, 9.0, 9.5],
+    FWD: [7.5, 8.0, 8.5, 9.0, 10.0, 11.0]
+  };
+  const range = priceRanges[position];
+  return range[Math.floor(Math.random() * range.length)];
+}
+
 async function main() {
   console.log('🌍 Seeding World Cup Fantasy 2026 database...');
 
@@ -386,14 +464,90 @@ async function main() {
   });
   console.log(`✅ Demo user created: ${demoUser.email}`);
 
+  // Create custom user for pragatid0902@gmail.com
+  const userHash = await bcrypt.hash('123321ilup', 12);
+  const pragatiUser = await prisma.user.upsert({
+    where: { email: 'pragatid0902@gmail.com' },
+    update: { password: userHash },
+    create: {
+      name: 'Pragati',
+      email: 'pragatid0902@gmail.com',
+      password: userHash,
+      avatar: '👑',
+    },
+  });
+  console.log(`✅ User 'Pragati' created: ${pragatiUser.email}`);
+
+  // Add hardcoded players to usedNames to avoid duplicates
+  for (const p of players) {
+    usedNames.add(p.name.toLowerCase());
+  }
+
+  // Create unified player list
+  const allSeededPlayers = [...players];
+
+  // For each team in wc2026Teams, check and generate missing players
+  for (const team of wc2026Teams) {
+    const teamPlayers = allSeededPlayers.filter(p => p.country === team.name);
+    
+    const gkCount = teamPlayers.filter(p => p.position === 'GK').length;
+    const defCount = teamPlayers.filter(p => p.position === 'DEF').length;
+    const midCount = teamPlayers.filter(p => p.position === 'MID').length;
+    const fwdCount = teamPlayers.filter(p => p.position === 'FWD').length;
+
+    // Generate missing GKs (target: 2)
+    for (let i = gkCount; i < 2; i++) {
+      allSeededPlayers.push({
+        name: generateUniqueName(team.name, team.code),
+        country: team.name,
+        countryCode: team.code,
+        position: 'GK',
+        price: getPriceForPosition('GK')
+      });
+    }
+
+    // Generate missing DEFs (target: 5)
+    for (let i = defCount; i < 5; i++) {
+      allSeededPlayers.push({
+        name: generateUniqueName(team.name, team.code),
+        country: team.name,
+        countryCode: team.code,
+        position: 'DEF',
+        price: getPriceForPosition('DEF')
+      });
+    }
+
+    // Generate missing MIDs (target: 5)
+    for (let i = midCount; i < 5; i++) {
+      allSeededPlayers.push({
+        name: generateUniqueName(team.name, team.code),
+        country: team.name,
+        countryCode: team.code,
+        position: 'MID',
+        price: getPriceForPosition('MID')
+      });
+    }
+
+    // Generate missing FWDs (target: 3)
+    for (let i = fwdCount; i < 3; i++) {
+      allSeededPlayers.push({
+        name: generateUniqueName(team.name, team.code),
+        country: team.name,
+        countryCode: team.code,
+        position: 'FWD',
+        price: getPriceForPosition('FWD')
+      });
+    }
+  }
+
   // Seed players
   let playerCount = 0;
-  for (const p of players) {
+  for (const p of allSeededPlayers) {
     await prisma.player.upsert({
-      where: { id: `player-${p.name.toLowerCase().replace(/\s+/g, '-')}` },
+      where: { id: `player-${p.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}` },
       update: { price: p.price },
       create: {
-        id: `player-${p.name.toLowerCase().replace(/\s+/g, '-')}`,
+        id: `player-${p.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}`,
         name: p.name,
         country: p.country,
         countryCode: p.countryCode,
@@ -403,7 +557,7 @@ async function main() {
     });
     playerCount++;
   }
-  console.log(`✅ ${playerCount} players seeded`);
+  console.log(`✅ ${playerCount} total players seeded (including generated squads)`);
 
   // Seed matches
   const startDate = new Date('2026-06-11T18:00:00Z');
@@ -432,6 +586,7 @@ async function main() {
   console.log(`✅ ${matchCount} matches seeded`);
   console.log('🎉 Database seeding complete!');
   console.log('');
+  console.log('📧 Custom login: pragatid0902@gmail.com / 123321ilup');
   console.log('📧 Admin login: admin@worldcupfantasy.com / Admin@2026!');
   console.log('📧 Demo login:  demo@worldcupfantasy.com / Demo@2026!');
 }

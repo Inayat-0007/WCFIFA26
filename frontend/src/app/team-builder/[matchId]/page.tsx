@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, X } from 'lucide-react';
+import { Search, ChevronDown, X, Sparkles, Trophy, Trash2, HelpCircle, CheckCircle2, RotateCcw, Info } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/ui/Navbar';
 import { getPositionColor, getFlagByCountry, cn } from '@/lib/utils';
@@ -12,17 +12,83 @@ import type { Match, Player, Position } from '@/types';
 import toast from 'react-hot-toast';
 
 const BUDGET = 100;
-const POSITION_SLOTS: Record<Position, number[]> = {
-  GK: [1],
-  DEF: [2, 3, 4, 5],
-  MID: [6, 7, 8],
-  FWD: [9, 10, 11],
+
+type Formation = '4-4-2' | '4-3-3' | '3-5-2' | '3-4-3' | '5-3-2';
+
+const FORMATIONS: Record<Formation, { GK: number; DEF: number; MID: number; FWD: number }> = {
+  '4-4-2': { GK: 1, DEF: 4, MID: 4, FWD: 2 },
+  '4-3-3': { GK: 1, DEF: 4, MID: 3, FWD: 3 },
+  '3-5-2': { GK: 1, DEF: 3, MID: 5, FWD: 2 },
+  '3-4-3': { GK: 1, DEF: 3, MID: 4, FWD: 3 },
+  '5-3-2': { GK: 1, DEF: 5, MID: 3, FWD: 2 },
 };
 
 interface SelectedPlayer extends Player {
   isCaptain?: boolean;
   isVC?: boolean;
 }
+
+// Synthesize UI sounds using Web Audio API
+const playSound = (type: 'tick' | 'success' | 'remove' | 'pop') => {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === 'tick') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } else if (type === 'pop') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } else if (type === 'success') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); // G5
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } else if (type === 'remove') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    }
+  } catch (e) {
+    // Audio context failed or blocked by autoplay
+  }
+};
+
+// Deterministic player stats generator
+const getPlayerStats = (player: Player) => {
+  let hash = 0;
+  for (let i = 0; i < player.name.length; i++) {
+    hash = player.name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const form = 6.0 + (Math.abs(hash % 38) / 10);
+  const selectedBy = 5 + (Math.abs(hash % 88));
+  return { form: form.toFixed(1), selectedBy: `${selectedBy}%` };
+};
 
 export default function TeamBuilderPage() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -38,8 +104,9 @@ export default function TeamBuilderPage() {
   const [search, setSearch] = useState('');
   const [showDrawer, setShowDrawer] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [contextPlayer, setContextPlayer] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [formation, setFormation] = useState<Formation>('4-4-2');
+  const [showCeremonyModal, setShowCeremonyModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/login');
@@ -62,6 +129,15 @@ export default function TeamBuilderPage() {
           setSelected(selPlayers);
           setCaptainId(team.captainId);
           setVcId(team.viceCaptainId);
+
+          // Attempt to match saved team structure to a valid formation
+          const defsCount = selPlayers.filter((p: Player) => p.position === 'DEF').length;
+          const midsCount = selPlayers.filter((p: Player) => p.position === 'MID').length;
+          const fwdsCount = selPlayers.filter((p: Player) => p.position === 'FWD').length;
+          const formStr = `${defsCount}-${midsCount}-${fwdsCount}` as Formation;
+          if (FORMATIONS[formStr]) {
+            setFormation(formStr);
+          }
         }
       } catch { } finally { setLoading(false); }
     };
@@ -72,6 +148,10 @@ export default function TeamBuilderPage() {
   const budgetLeft = BUDGET - budgetUsed;
   const isLocked = match?.status === 'LIVE' || match?.status === 'COMPLETED';
 
+  // Compute team splits
+  const homeCount = selected.filter((p) => p.country === match?.homeTeam).length;
+  const awayCount = selected.filter((p) => p.country === match?.awayTeam).length;
+
   const filteredPlayers = players.filter((p) => {
     const matchesPos = !filter || p.position === filter;
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.country.toLowerCase().includes(search.toLowerCase());
@@ -80,28 +160,81 @@ export default function TeamBuilderPage() {
 
   const addPlayer = (player: Player) => {
     if (selected.find((s) => s.id === player.id)) return;
-    if (selected.length >= 11) { toast.error('Team is full! Remove a player first.'); return; }
-    if (budgetLeft < player.price) { toast.error(`Not enough budget! Need ${player.price} credits.`); return; }
+    
+    const limits = FORMATIONS[formation];
+    const currentPosCount = selected.filter((s) => s.position === player.position).length;
+
+    if (selected.length >= 11) {
+      toast.error('Team is full! Remove a player first.');
+      return;
+    }
+
+    if (currentPosCount >= limits[player.position]) {
+      toast.error(`Formation limit reached for ${player.position}! Swap formation or remove a ${player.position}.`);
+      return;
+    }
+
+    if (budgetLeft < player.price) {
+      toast.error(`Budget exceeded! Need ${player.price} credits.`);
+      return;
+    }
+
+    playSound('pop');
     setSelected((prev) => [...prev, player]);
-    if (!captainId && selected.length === 0) setCaptainId(player.id);
-    if (!vcId && selected.length === 1) setVcId(player.id);
   };
 
   const removePlayer = (playerId: string) => {
+    playSound('remove');
     setSelected((prev) => prev.filter((p) => p.id !== playerId));
     if (captainId === playerId) setCaptainId('');
     if (vcId === playerId) setVcId('');
-    setContextPlayer(null);
   };
 
-  const saveTeam = async () => {
-    if (selected.length !== 11) { toast.error('Select exactly 11 players!'); return; }
-    if (!captainId) { toast.error('Choose a captain!'); return; }
-    if (!vcId) { toast.error('Choose a vice-captain!'); return; }
+  const changeFormation = (newForm: Formation) => {
+    playSound('tick');
+    const limits = FORMATIONS[newForm];
+    
+    // Check if we exceed limits
+    const gks = selected.filter(p => p.position === 'GK');
+    const defs = selected.filter(p => p.position === 'DEF');
+    const mids = selected.filter(p => p.position === 'MID');
+    const fwds = selected.filter(p => p.position === 'FWD');
 
+    const newGks = gks.slice(0, limits.GK);
+    const newDefs = defs.slice(0, limits.DEF);
+    const newMids = mids.slice(0, limits.MID);
+    const newFwds = fwds.slice(0, limits.FWD);
+
+    const adjusted = [...newGks, ...newDefs, ...newMids, ...newFwds];
+    const removedCount = selected.length - adjusted.length;
+    
+    if (removedCount > 0) {
+      toast(`Adjusted team to fit ${newForm} formation. Removed ${removedCount} player(s).`, { icon: '🔄' });
+    }
+    
+    setSelected(adjusted);
+    setFormation(newForm);
+  };
+
+  const openSaveCeremony = () => {
+    if (selected.length !== 11) {
+      toast.error('Select exactly 11 players first!');
+      return;
+    }
     const gkCount = selected.filter((p) => p.position === 'GK').length;
-    if (gkCount !== 1) { toast.error('You must have exactly 1 Goalkeeper!'); return; }
+    if (gkCount !== 1) {
+      toast.error('Your team must contain exactly 1 Goalkeeper!');
+      return;
+    }
+    playSound('success');
+    setShowCeremonyModal(true);
+  };
 
+  const submitTeam = async () => {
+    if (!captainId || !vcId) {
+      toast.error('You must choose a Captain & Vice-Captain!');
+      return;
+    }
     setSaving(true);
     try {
       await api.post('/teams', {
@@ -110,7 +243,7 @@ export default function TeamBuilderPage() {
         captainId,
         viceCaptainId: vcId,
       });
-      toast.success('Team saved! Good luck! 🏆');
+      toast.success('Fantasy Squad Saved Successfully! 🏆');
       router.push('/dashboard');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to save team';
@@ -120,173 +253,372 @@ export default function TeamBuilderPage() {
     }
   };
 
-  // Group selected players by position for pitch view
-  const gks = selected.filter((p) => p.position === 'GK');
-  const defs = selected.filter((p) => p.position === 'DEF');
-  const mids = selected.filter((p) => p.position === 'MID');
-  const fwds = selected.filter((p) => p.position === 'FWD');
-  const emptySlots = 11 - selected.length;
+  const getPositionPlayers = (pos: Position) => {
+    return selected.filter((p) => p.position === pos);
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
-        <div className="text-5xl animate-float">⚽</div>
+      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
+        <div className="text-5xl animate-bounce">⚽</div>
       </div>
     );
   }
 
+  // Budget color scheme
+  const budgetPercent = (budgetUsed / BUDGET) * 100;
+  const budgetColor = budgetLeft < 0 
+    ? 'bg-gradient-to-r from-red-600 to-rose-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]'
+    : budgetLeft < 10 
+      ? 'bg-gradient-to-r from-amber-500 to-red-500' 
+      : 'bg-gradient-to-r from-[#DC143C] to-[#FFD700]';
+
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-[#0A0A0F] text-white">
       <Navbar />
 
-      {/* Top Bar */}
-      <div className="glass border-b border-white/5 px-4 py-3 sticky top-16 z-30">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-xs text-gray-500">
-              {match?.homeTeam} vs {match?.awayTeam}
-            </p>
+      {/* Main Container */}
+      <main className="max-w-7xl mx-auto px-4 pt-4 pb-24">
+        
+        {/* Top Header stats bar */}
+        <div className="glass rounded-2xl p-4 border border-white/5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{getFlagByCountry(match?.homeTeam || '')}</span>
+            <div className="text-left">
+              <h2 className="font-bold text-sm leading-tight md:text-base">{match?.homeTeam} vs {match?.awayTeam}</h2>
+              <p className="text-xs text-gray-400">WC 2026 Group Stage</p>
+            </div>
+            <span className="text-2xl">{getFlagByCountry(match?.awayTeam || '')}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500">Budget</p>
-              <p className={cn('text-sm font-black', budgetLeft < 0 ? 'text-primary-400' : 'text-gold-400')}>
-                {budgetLeft.toFixed(1)}
+
+          {/* Stats Badges */}
+          <div className="flex flex-wrap items-center gap-3 md:gap-6">
+            <div className="text-center px-3 py-1 bg-white/5 rounded-xl border border-white/5">
+              <p className="text-[10px] text-gray-400">Players Selected</p>
+              <p className="text-sm font-black text-white">{selected.length}/11</p>
+            </div>
+            <div className="text-center px-3 py-1 bg-white/5 rounded-xl border border-white/5">
+              <p className="text-[10px] text-gray-400">Balance (H:A)</p>
+              <p className="text-sm font-black text-[#FFD700]">
+                {homeCount} : {awayCount}
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500">Players</p>
-              <p className={cn('text-sm font-black', selected.length === 11 ? 'text-green-400' : 'text-white')}>
-                {selected.length}/11
+            <div className="text-center px-3 py-1 bg-white/5 rounded-xl border border-white/5">
+              <p className="text-[10px] text-gray-400">Credits Remaining</p>
+              <p className={cn('text-sm font-black transition-colors', budgetLeft < 0 ? 'text-red-500 animate-pulse' : 'text-[#FFD700]')}>
+                {budgetLeft.toFixed(1)} / 100
               </p>
             </div>
           </div>
         </div>
-      </div>
 
-      <main className="max-w-4xl mx-auto px-4 pb-32 md:pb-10">
-        {isLocked && (
-          <div className="mt-4 p-3 rounded-xl text-center text-sm font-semibold text-primary-400 glass-red">
-            🔒 Team is locked — match has started
-          </div>
-        )}
-
-        {/* Football Pitch View */}
-        <div className="mt-4 relative rounded-3xl overflow-hidden" style={{ minHeight: '480px' }}>
-          {/* Pitch background */}
-          <div className="absolute inset-0 pitch-bg" />
-          {/* Pitch markings SVG */}
-          <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg">
-            <rect x="20" y="20" width="360" height="510" fill="none" stroke="white" strokeWidth="2" />
-            <line x1="20" y1="275" x2="380" y2="275" stroke="white" strokeWidth="1" />
-            <circle cx="200" cy="275" r="50" fill="none" stroke="white" strokeWidth="1" />
-            <rect x="100" y="20" width="200" height="80" fill="none" stroke="white" strokeWidth="1" />
-            <rect x="140" y="20" width="120" height="40" fill="none" stroke="white" strokeWidth="1" />
-            <rect x="100" y="450" width="200" height="80" fill="none" stroke="white" strokeWidth="1" />
-            <rect x="140" y="490" width="120" height="40" fill="none" stroke="white" strokeWidth="1" />
-            <circle cx="200" cy="90" r="6" fill="white" />
-            <circle cx="200" cy="460" r="6" fill="white" />
-            <circle cx="200" cy="275" r="4" fill="white" />
-          </svg>
-
-          {/* Players on pitch */}
-          <div className="relative z-10 flex flex-col justify-between py-8 px-4 h-full min-h-[480px]">
-            {/* Forwards */}
-            <PitchRow players={fwds} emptyCount={Math.max(0, 3 - fwds.length)} label="FWD"
-              captainId={captainId} vcId={vcId}
-              onTap={(id) => setContextPlayer(contextPlayer === id ? null : id)}
-              contextPlayer={contextPlayer}
-              onSetCaptain={(id) => { setCaptainId(id); if (vcId === id) setVcId(''); setContextPlayer(null); }}
-              onSetVC={(id) => { setVcId(id); if (captainId === id) setCaptainId(''); setContextPlayer(null); }}
-              onRemove={removePlayer} onAdd={() => { setFilter('FWD'); setShowDrawer(true); }} />
-
-            {/* Midfielders */}
-            <PitchRow players={mids} emptyCount={Math.max(0, 4 - mids.length)} label="MID"
-              captainId={captainId} vcId={vcId}
-              onTap={(id) => setContextPlayer(contextPlayer === id ? null : id)}
-              contextPlayer={contextPlayer}
-              onSetCaptain={(id) => { setCaptainId(id); if (vcId === id) setVcId(''); setContextPlayer(null); }}
-              onSetVC={(id) => { setVcId(id); if (captainId === id) setCaptainId(''); setContextPlayer(null); }}
-              onRemove={removePlayer} onAdd={() => { setFilter('MID'); setShowDrawer(true); }} />
-
-            {/* Defenders */}
-            <PitchRow players={defs} emptyCount={Math.max(0, 4 - defs.length)} label="DEF"
-              captainId={captainId} vcId={vcId}
-              onTap={(id) => setContextPlayer(contextPlayer === id ? null : id)}
-              contextPlayer={contextPlayer}
-              onSetCaptain={(id) => { setCaptainId(id); if (vcId === id) setVcId(''); setContextPlayer(null); }}
-              onSetVC={(id) => { setVcId(id); if (captainId === id) setCaptainId(''); setContextPlayer(null); }}
-              onRemove={removePlayer} onAdd={() => { setFilter('DEF'); setShowDrawer(true); }} />
-
-            {/* Goalkeeper */}
-            <PitchRow players={gks} emptyCount={Math.max(0, 1 - gks.length)} label="GK"
-              captainId={captainId} vcId={vcId}
-              onTap={(id) => setContextPlayer(contextPlayer === id ? null : id)}
-              contextPlayer={contextPlayer}
-              onSetCaptain={(id) => { setCaptainId(id); if (vcId === id) setVcId(''); setContextPlayer(null); }}
-              onSetVC={(id) => { setVcId(id); if (captainId === id) setCaptainId(''); setContextPlayer(null); }}
-              onRemove={removePlayer} onAdd={() => { setFilter('GK'); setShowDrawer(true); }} />
-          </div>
+        {/* Live Budget progress bar */}
+        <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-6 border border-white/5">
+          <motion.div 
+            className={cn('h-full rounded-full transition-all duration-300', budgetColor)} 
+            style={{ width: `${Math.min(100, budgetPercent)}%` }}
+            layout
+          />
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-4 flex gap-3">
-          <button
-            onClick={() => { setFilter(''); setShowDrawer(true); }}
-            className="flex-1 py-3 rounded-xl font-semibold text-white glass border border-white/10 hover:border-white/20 transition-all"
-          >
-            + Add Players
-          </button>
-          <button
-            onClick={saveTeam}
-            disabled={saving || isLocked || selected.length !== 11 || !captainId || !vcId}
-            className="flex-1 py-3 rounded-xl font-bold text-white transition-all hover:scale-[1.02] disabled:opacity-50"
-            style={{ background: 'linear-gradient(135deg, #DC143C, #a01030)', boxShadow: '0 4px 20px rgba(220,20,60,0.3)' }}
-          >
-            {saving ? 'Saving...' : 'Save Team 🏆'}
-          </button>
+        {/* Split view Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* LEFT COLUMN: PITCH & CONTROLS */}
+          <div className="lg:col-span-7 flex flex-col gap-4">
+            
+            {/* Formation switcher */}
+            <div className="flex items-center justify-between p-3 glass rounded-2xl border border-white/5">
+              <span className="text-xs font-semibold text-gray-400 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#FFD700]" /> Select Formation:
+              </span>
+              <div className="flex gap-1">
+                {(['4-4-2', '4-3-3', '3-5-2', '3-4-3', '5-3-2'] as Formation[]).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => changeFormation(f)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-xs font-bold transition-all border',
+                      formation === f 
+                        ? 'bg-[#DC143C]/20 border-[#DC143C] text-white' 
+                        : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10 hover:text-white'
+                    )}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pitch graphic container */}
+            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl" style={{ minHeight: '520px' }}>
+              <div className="absolute inset-0 pitch-bg opacity-90" />
+              
+              {/* Pitch Markings */}
+              <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg">
+                <rect x="15" y="15" width="370" height="520" fill="none" stroke="white" strokeWidth="2.5" />
+                <line x1="15" y1="275" x2="385" y2="275" stroke="white" strokeWidth="2" />
+                <circle cx="200" cy="275" r="50" fill="none" stroke="white" strokeWidth="1.5" />
+                <rect x="90" y="15" width="220" height="90" fill="none" stroke="white" strokeWidth="1.5" />
+                <rect x="135" y="15" width="130" height="40" fill="none" stroke="white" strokeWidth="1.5" />
+                <rect x="90" y="445" width="220" height="90" fill="none" stroke="white" strokeWidth="1.5" />
+                <rect x="135" y="495" width="130" height="40" fill="none" stroke="white" strokeWidth="1.5" />
+                <circle cx="200" cy="80" r="5" fill="white" />
+                <circle cx="200" cy="470" r="5" fill="white" />
+                <circle cx="200" cy="275" r="4.5" fill="white" />
+              </svg>
+
+              {/* Autodetect / Active Formation Badge */}
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-black/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
+                <p className="text-[10px] font-black tracking-widest text-[#FFD700] uppercase">
+                  {selected.length === 11 ? `Squad Formation: ${formation}` : `Building: ${selected.length} / 11 Players`}
+                </p>
+              </div>
+
+              {/* DRAG TO REMOVE DECAL */}
+              <div className="absolute bottom-3 left-3 text-[9px] text-gray-500 font-semibold uppercase flex items-center gap-1">
+                <Info className="w-3 h-3 text-[#DC143C]" /> Drag jersey off pitch to discard
+              </div>
+
+              {/* Rows inside Pitch */}
+              <div className="relative z-10 flex flex-col justify-between py-12 px-4 h-full min-h-[520px]">
+                
+                {/* Forwards (FWD) */}
+                <PitchRow 
+                  players={getPositionPlayers('FWD')} 
+                  limit={FORMATIONS[formation].FWD}
+                  position="FWD"
+                  onRemove={removePlayer}
+                  onAdd={() => { setFilter('FWD'); setShowDrawer(true); }}
+                  captainId={captainId}
+                  vcId={vcId}
+                />
+
+                {/* Midfielders (MID) */}
+                <PitchRow 
+                  players={getPositionPlayers('MID')} 
+                  limit={FORMATIONS[formation].MID}
+                  position="MID"
+                  onRemove={removePlayer}
+                  onAdd={() => { setFilter('MID'); setShowDrawer(true); }}
+                  captainId={captainId}
+                  vcId={vcId}
+                />
+
+                {/* Defenders (DEF) */}
+                <PitchRow 
+                  players={getPositionPlayers('DEF')} 
+                  limit={FORMATIONS[formation].DEF}
+                  position="DEF"
+                  onRemove={removePlayer}
+                  onAdd={() => { setFilter('DEF'); setShowDrawer(true); }}
+                  captainId={captainId}
+                  vcId={vcId}
+                />
+
+                {/* Goalkeeper (GK) */}
+                <PitchRow 
+                  players={getPositionPlayers('GK')} 
+                  limit={FORMATIONS[formation].GK}
+                  position="GK"
+                  onRemove={removePlayer}
+                  onAdd={() => { setFilter('GK'); setShowDrawer(true); }}
+                  captainId={captainId}
+                  vcId={vcId}
+                />
+
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setSelected([]); setCaptainId(''); setVcId(''); playSound('remove'); }}
+                disabled={selected.length === 0}
+                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <RotateCcw className="w-4 h-4" /> Reset
+              </button>
+
+              <button
+                onClick={() => { setFilter(''); setShowDrawer(true); }}
+                className="flex-1 lg:hidden py-3 rounded-2xl font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all text-center"
+              >
+                + Browse Selection
+              </button>
+
+              <button
+                onClick={openSaveCeremony}
+                disabled={selected.length !== 11 || budgetLeft < 0 || isLocked}
+                className={cn(
+                  'flex-1 py-3 rounded-2xl font-black tracking-wide text-white transition-all transform hover:scale-[1.01] hover:brightness-115 active:scale-[0.99] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-center'
+                )}
+                style={{
+                  background: 'linear-gradient(135deg, #DC143C, #8B0000)',
+                  boxShadow: selected.length === 11 && budgetLeft >= 0 ? '0 4px 20px rgba(220, 20, 60, 0.4)' : 'none',
+                }}
+              >
+                {isLocked ? 'Match Locked' : selected.length === 11 ? 'Save & Assign Captains 👑' : `Select ${11 - selected.length} more player(s)`}
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: DESKTOP PLAYER LIST PANEL */}
+          <div className="hidden lg:flex lg:col-span-5 flex-col max-h-[660px] glass rounded-3xl border border-white/5 p-4 overflow-hidden">
+            <h3 className="font-extrabold text-base flex items-center gap-2 mb-3">
+              <Trophy className="w-4 h-4 text-[#FFD700]" /> Select Player Pool
+            </h3>
+            
+            {/* Tab Filters */}
+            <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
+              {(['', 'GK', 'DEF', 'MID', 'FWD'] as const).map((pos) => (
+                <button
+                  key={pos || 'all'}
+                  onClick={() => { setFilter(pos); playSound('tick'); }}
+                  className={cn(
+                    'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap',
+                    filter === pos 
+                      ? 'bg-[#DC143C]/20 border-[#DC143C] text-white' 
+                      : 'bg-white/5 border-transparent text-gray-400 hover:text-white'
+                  )}
+                >
+                  {pos || 'All Positions'}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search player or team name..."
+                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs placeholder-gray-500 focus:border-[#DC143C]/50 transition-colors"
+              />
+            </div>
+
+            {/* List Header */}
+            <div className="flex items-center justify-between text-[10px] text-gray-500 font-extrabold uppercase px-2 mb-1.5">
+              <span>Player Info</span>
+              <div className="flex gap-4">
+                <span className="w-12 text-center">Form</span>
+                <span className="w-12 text-center">Credits</span>
+                <span className="w-8"></span>
+              </div>
+            </div>
+
+            {/* Scrollable list */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
+              {filteredPlayers.length === 0 ? (
+                <div className="text-center py-12 text-gray-500 text-xs">No players match the search filters.</div>
+              ) : (
+                filteredPlayers.map((player) => {
+                  const isSelected = !!selected.find((s) => s.id === player.id);
+                  const canAfford = budgetLeft >= player.price;
+                  const stats = getPlayerStats(player);
+                  return (
+                    <motion.div
+                      key={player.id}
+                      className={cn(
+                        'flex items-center justify-between p-2.5 rounded-xl border transition-all hover:bg-white/5',
+                        isSelected 
+                          ? 'bg-[#DC143C]/10 border-[#DC143C]/30' 
+                          : 'bg-white/[0.02] border-white/5'
+                      )}
+                      layoutId={`player-card-${player.id}`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-2xl select-none">{getFlagByCountry(player.country)}</span>
+                        <div className="min-w-0 leading-tight">
+                          <p className="font-bold text-xs truncate">{player.name}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
+                              {player.position}
+                            </span>
+                            <span className="text-[10px] text-gray-400">{player.country}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <span className="text-xs font-semibold text-green-400 w-12 text-center">⭐ {stats.form}</span>
+                        <span className="text-xs font-black text-[#FFD700] w-12 text-center">{player.price}</span>
+                        <button
+                          onClick={() => isSelected ? removePlayer(player.id) : addPlayer(player)}
+                          disabled={!isSelected && (!canAfford || selected.length >= 11)}
+                          className={cn(
+                            'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold border transition-all',
+                            isSelected
+                              ? 'bg-[#DC143C]/20 border-[#DC143C]/50 text-[#DC143C] hover:bg-[#DC143C]/30'
+                              : canAfford && selected.length < 11
+                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
+                                : 'bg-white/5 border-transparent text-gray-600 cursor-not-allowed'
+                          )}
+                        >
+                          {isSelected ? '−' : '+'}
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* List footer */}
+            <div className="mt-3 pt-2.5 border-t border-white/5 text-center text-[10px] text-gray-500 flex justify-between items-center px-1">
+              <span>FIFA Pool: {players.length} players available</span>
+              <span>Need 1 GK, max 11 players</span>
+            </div>
+          </div>
+
         </div>
+
       </main>
 
-      {/* Player Selection Drawer */}
+      {/* MOBILE DRAWER PORTAL */}
       <AnimatePresence>
         {showDrawer && (
           <>
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/70 z-40 backdrop-blur-sm lg:hidden"
               onClick={() => setShowDrawer(false)}
             />
+            {/* Drawer */}
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[75vh] flex flex-col rounded-t-3xl"
-              style={{ background: '#1A1A24', border: '1px solid rgba(255,255,255,0.08)' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-h-[75vh] flex flex-col rounded-t-3xl border-t border-white/10 lg:hidden"
+              style={{ background: '#0F0F15' }}
             >
-              {/* Drawer Header */}
+              {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-white/5">
                 <div>
-                  <h3 className="font-bold">Select Players</h3>
-                  <p className="text-xs text-gray-500">Budget left: {budgetLeft.toFixed(1)} credits</p>
+                  <h3 className="font-black text-sm">Select Squad Member</h3>
+                  <p className="text-[10px] text-gray-400">Budget Remaining: {budgetLeft.toFixed(1)} credits</p>
                 </div>
-                <button onClick={() => setShowDrawer(false)} className="p-2 rounded-xl glass">
+                <button onClick={() => setShowDrawer(false)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Position Filters */}
-              <div className="flex gap-2 px-4 py-3 overflow-x-auto">
+              {/* Filters */}
+              <div className="flex gap-1.5 px-4 py-2 overflow-x-auto pb-3">
                 {(['', 'GK', 'DEF', 'MID', 'FWD'] as const).map((pos) => (
                   <button
                     key={pos || 'all'}
-                    onClick={() => setFilter(pos)}
+                    onClick={() => { setFilter(pos); playSound('tick'); }}
                     className={cn(
-                      'px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all',
-                      filter === pos ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' : 'text-gray-400 glass'
+                      'px-3 py-1 rounded-xl text-xs font-bold border transition-all whitespace-nowrap',
+                      filter === pos 
+                        ? 'bg-[#DC143C]/20 border-[#DC143C] text-white' 
+                        : 'bg-white/5 border-transparent text-gray-400 hover:text-white'
                     )}
                   >
                     {pos || 'All'}
@@ -301,48 +633,59 @@ export default function TeamBuilderPage() {
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search players..."
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-dark-700 border border-dark-500 text-white text-sm placeholder-gray-600 focus:border-primary-500 transition-colors"
+                    placeholder="Search name or country..."
+                    className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs placeholder-gray-500"
                   />
                 </div>
               </div>
 
-              {/* Player List */}
-              <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+              {/* List */}
+              <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-2">
                 {filteredPlayers.map((player) => {
                   const isSelected = !!selected.find((s) => s.id === player.id);
                   const canAfford = budgetLeft >= player.price;
+                  const stats = getPlayerStats(player);
                   return (
                     <div
                       key={player.id}
                       className={cn(
-                        'flex items-center gap-3 p-3 rounded-xl transition-all',
-                        isSelected ? 'bg-primary-500/10 border border-primary-500/30' : 'glass'
+                        'flex items-center justify-between p-3 rounded-xl border transition-all',
+                        isSelected 
+                          ? 'bg-[#DC143C]/10 border-[#DC143C]/30' 
+                          : 'bg-white/[0.02] border-white/5'
                       )}
                     >
-                      <div className="text-2xl">{getFlagByCountry(player.country)}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{player.name}</p>
-                        <p className="text-xs text-gray-500">{player.country}</p>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{getFlagByCountry(player.country)}</span>
+                        <div>
+                          <p className="font-bold text-xs">{player.name}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
+                              {player.position}
+                            </span>
+                            <span className="text-[10px] text-gray-400">{player.country}</span>
+                          </div>
+                        </div>
                       </div>
-                      <span className={cn('text-xs px-2 py-0.5 rounded-lg font-semibold border', getPositionColor(player.position))}>
-                        {player.position}
-                      </span>
-                      <span className="text-xs font-bold text-gold-400 w-10 text-right">{player.price}</span>
-                      <button
-                        onClick={() => isSelected ? removePlayer(player.id) : addPlayer(player)}
-                        disabled={!isSelected && (!canAfford || selected.length >= 11)}
-                        className={cn(
-                          'w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all',
-                          isSelected
-                            ? 'bg-primary-500/20 text-primary-400 hover:bg-primary-500/30'
-                            : canAfford && selected.length < 11
-                              ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                              : 'bg-dark-600 text-gray-600 cursor-not-allowed'
-                        )}
-                      >
-                        {isSelected ? '−' : '+'}
-                      </button>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] text-green-400 font-bold">⭐ {stats.form}</span>
+                        <span className="text-xs font-black text-[#FFD700]">{player.price}</span>
+                        <button
+                          onClick={() => isSelected ? removePlayer(player.id) : addPlayer(player)}
+                          disabled={!isSelected && (!canAfford || selected.length >= 11)}
+                          className={cn(
+                            'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold border',
+                            isSelected
+                              ? 'bg-[#DC143C]/20 border-[#DC143C]/50 text-[#DC143C]'
+                              : canAfford && selected.length < 11
+                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                                : 'bg-white/5 border-transparent text-gray-600 cursor-not-allowed'
+                          )}
+                        >
+                          {isSelected ? '−' : '+'}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -351,57 +694,268 @@ export default function TeamBuilderPage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* CEREMONIAL CAPTAINCY MODAL */}
+      <AnimatePresence>
+        {showCeremonyModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setShowCeremonyModal(false)}
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className="relative w-full max-w-xl glass border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col max-h-[85vh] z-50"
+              style={{ background: '#0F0F15' }}
+            >
+              {/* Gold light burst decoration */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-yellow-500/10 rounded-full blur-[60px] pointer-events-none" />
+
+              {/* Modal Header */}
+              <div className="text-center mb-4 relative">
+                <Sparkles className="w-8 h-8 text-[#FFD700] mx-auto mb-2 animate-pulse" />
+                <h3 className="text-lg font-black tracking-wide">Assign Captain & Vice-Captain</h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  Captain earns <span className="text-[#FFD700] font-black">2x points</span>. Vice-Captain earns <span className="text-gray-300 font-black">1.5x points</span>.
+                </p>
+              </div>
+
+              {/* List of selected 11 */}
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 py-1">
+                {selected.map((player) => {
+                  const stats = getPlayerStats(player);
+                  const isCap = captainId === player.id;
+                  const isVc = vcId === player.id;
+
+                  return (
+                    <div
+                      key={player.id}
+                      className={cn(
+                        'flex items-center justify-between p-3 rounded-2xl border transition-all',
+                        isCap 
+                          ? 'bg-[#FFD700]/5 border-[#FFD700]/30' 
+                          : isVc 
+                            ? 'bg-gray-300/5 border-gray-300/30' 
+                            : 'bg-white/[0.01] border-white/5 hover:bg-white/5'
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{getFlagByCountry(player.country)}</span>
+                        <div className="text-left leading-tight">
+                          <p className="font-bold text-xs">{player.name}</p>
+                          <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
+                            {player.position}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Captain Choice badges */}
+                      <div className="flex items-center gap-2">
+                        {/* Captain Button */}
+                        <button
+                          onClick={() => {
+                            playSound('tick');
+                            setCaptainId(player.id);
+                            if (vcId === player.id) setVcId('');
+                          }}
+                          className={cn(
+                            'w-10 h-10 rounded-full font-black text-xs border flex items-center justify-center transition-all',
+                            isCap
+                              ? 'bg-[#FFD700] text-dark-900 border-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.4)]'
+                              : 'bg-white/5 border-white/10 text-gray-400 hover:border-[#FFD700]'
+                          )}
+                        >
+                          C
+                        </button>
+                        {/* Vice Captain Button */}
+                        <button
+                          onClick={() => {
+                            playSound('tick');
+                            setVcId(player.id);
+                            if (captainId === player.id) setCaptainId('');
+                          }}
+                          className={cn(
+                            'w-10 h-10 rounded-full font-black text-xs border flex items-center justify-center transition-all',
+                            isVc
+                              ? 'bg-gray-300 text-dark-900 border-gray-300 shadow-[0_0_10px_rgba(200,200,200,0.4)]'
+                              : 'bg-white/5 border-white/10 text-gray-400 hover:border-gray-300'
+                          )}
+                        >
+                          VC
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Confirm Save CTA */}
+              <div className="mt-4 pt-3 border-t border-white/5 flex gap-3">
+                <button
+                  onClick={() => setShowCeremonyModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 font-bold hover:bg-white/10 hover:text-white transition-all text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitTeam}
+                  disabled={saving || !captainId || !vcId}
+                  className="flex-1 py-2.5 rounded-xl font-extrabold text-white transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'linear-gradient(135deg, #DC143C, #8B0000)',
+                    boxShadow: '0 4px 15px rgba(220, 20, 60, 0.3)',
+                  }}
+                >
+                  {saving ? 'Saving...' : 'Lock Squad & Save Team 🏆'}
+                </button>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
 
 // Pitch Row Component
-function PitchRow({ players, emptyCount, label, captainId, vcId, onTap, contextPlayer, onSetCaptain, onSetVC, onRemove, onAdd }: {
-  players: SelectedPlayer[]; emptyCount: number; label: string;
-  captainId: string; vcId: string; contextPlayer: string | null;
-  onTap: (id: string) => void; onSetCaptain: (id: string) => void;
-  onSetVC: (id: string) => void; onRemove: (id: string) => void; onAdd: () => void;
+function PitchRow({ 
+  players, 
+  limit, 
+  position, 
+  onRemove, 
+  onAdd, 
+  captainId, 
+  vcId 
+}: {
+  players: SelectedPlayer[]; 
+  limit: number; 
+  position: Position;
+  onRemove: (id: string) => void; 
+  onAdd: () => void;
+  captainId: string;
+  vcId: string;
 }) {
+  const emptyCount = Math.max(0, limit - players.length);
+  
   return (
-    <div className="flex justify-center gap-3 flex-wrap">
-      {players.map((player) => (
-        <div key={player.id} className="flex flex-col items-center relative">
-          <button
-            onClick={() => onTap(player.id)}
-            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center text-xs font-bold relative"
-            style={{ background: 'rgba(0,0,0,0.6)', border: '2px solid rgba(255,255,255,0.2)' }}
-          >
-            <span className="text-lg">{getFlagByCountry(player.country)}</span>
-            {captainId === player.id && (
-              <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gold-400 flex items-center justify-center text-[10px] font-black text-dark-900">C</div>
-            )}
-            {vcId === player.id && (
-              <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-[10px] font-black text-dark-900">V</div>
-            )}
-          </button>
-          <p className="text-[9px] text-white font-semibold mt-1 max-w-[56px] text-center truncate">
-            {player.name.split(' ').pop()}
-          </p>
-          <p className="text-[9px] text-gold-400">{player.price}</p>
+    <div className="flex flex-col items-center gap-1">
+      {/* Position Header Label */}
+      <span className={cn('text-[9px] px-1.5 py-0.5 rounded font-black border tracking-wider select-none uppercase mb-1', getPositionColor(position))}>
+        {position} ({players.length}/{limit})
+      </span>
 
-          {/* Context menu */}
-          {contextPlayer === player.id && (
-            <div className="absolute top-[-80px] left-1/2 -translate-x-1/2 z-20 rounded-xl p-2 flex flex-col gap-1 min-w-[120px]"
-              style={{ background: '#222230', border: '1px solid rgba(255,255,255,0.15)' }}>
-              <button onClick={() => onSetCaptain(player.id)} className="text-[11px] text-gold-400 hover:text-gold-300 px-2 py-1 rounded text-left">👑 Set Captain</button>
-              <button onClick={() => onSetVC(player.id)} className="text-[11px] text-gray-300 hover:text-white px-2 py-1 rounded text-left">⭐ Set Vice-Cap</button>
-              <button onClick={() => onRemove(player.id)} className="text-[11px] text-primary-400 hover:text-primary-300 px-2 py-1 rounded text-left">✕ Remove</button>
-            </div>
-          )}
-        </div>
-      ))}
-      {[...Array(Math.max(0, emptyCount))].map((_, i) => (
-        <button key={i} onClick={onAdd}
-          className="w-14 h-14 rounded-xl flex items-center justify-center text-xl text-gray-600 hover:text-gray-400 transition-colors"
-          style={{ background: 'rgba(0,0,0,0.4)', border: '2px dashed rgba(255,255,255,0.15)' }}>
-          +
-        </button>
-      ))}
+      {/* Players Row */}
+      <div className="flex justify-center gap-4 flex-wrap w-full max-w-lg min-h-[75px] items-center py-1">
+        
+        {/* Render Selected Players */}
+        <AnimatePresence mode="popLayout">
+          {players.map((player) => {
+            const isCaptain = captainId === player.id;
+            const isVC = vcId === player.id;
+
+            return (
+              <motion.div
+                key={player.id}
+                className="flex flex-col items-center relative cursor-grab active:cursor-grabbing group"
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.7, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                layoutId={`jersey-${player.id}`}
+                // Drag options
+                drag
+                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                dragElastic={0.4}
+                onDragEnd={(event, info) => {
+                  const threshold = 70;
+                  if (Math.abs(info.offset.x) > threshold || Math.abs(info.offset.y) > threshold) {
+                    onRemove(player.id);
+                  }
+                }}
+              >
+                
+                {/* Floating Jersey / Badge */}
+                <div 
+                  className={cn(
+                    'w-13 h-13 md:w-14 md:h-14 rounded-full flex flex-col items-center justify-center text-xs font-black relative shadow-lg transition-transform group-hover:scale-110 border-2 select-none bg-black/70',
+                    isCaptain 
+                      ? 'border-[#FFD700] shadow-[0_0_12px_rgba(255,215,0,0.5)]' 
+                      : isVC 
+                        ? 'border-gray-300 shadow-[0_0_12px_rgba(220,220,220,0.4)]' 
+                        : 'border-white/20 hover:border-white/50'
+                  )}
+                >
+                  <span className="text-xl leading-none">{getFlagByCountry(player.country)}</span>
+                  
+                  {/* Captain Badge Indicator */}
+                  {isCaptain && (
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center text-[9px] font-black text-black border border-black shadow">
+                      C
+                    </div>
+                  )}
+
+                  {/* Vice-Captain Badge Indicator */}
+                  {isVC && (
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-[9px] font-black text-black border border-black shadow">
+                      V
+                    </div>
+                  )}
+
+                  {/* Tiny position badge */}
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-black/80 px-1 border border-white/10 rounded text-[7px] text-gray-400 scale-90 uppercase">
+                    {player.country.substring(0, 3)}
+                  </div>
+                </div>
+
+                {/* Player details */}
+                <div className="mt-2.5 text-center leading-none pointer-events-none select-none max-w-[65px]">
+                  <p className="text-[9px] md:text-[10px] text-white font-extrabold truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                    {player.name.split(' ').pop()}
+                  </p>
+                  <p className="text-[8px] text-[#FFD700] font-semibold mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                    {player.price} Cr
+                  </p>
+                </div>
+
+                {/* Hover Delete Action Button */}
+                <button
+                  onClick={() => onRemove(player.id)}
+                  className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-red-600/90 hover:bg-red-500 border border-white/10 flex items-center justify-center text-[9px] font-bold text-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {/* Render dashed "+" empty slots */}
+        {[...Array(emptyCount)].map((_, idx) => (
+          <motion.button
+            key={`empty-${idx}`}
+            onClick={onAdd}
+            className="w-13 h-13 md:w-14 md:h-14 rounded-full flex items-center justify-center border-2 border-dashed border-white/10 bg-black/20 hover:bg-black/40 hover:border-white/30 text-white/30 hover:text-white/60 transition-all shadow-inner group/btn"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.7 }}
+            whileHover={{ scale: 1.05, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <span className="text-base font-extrabold transition-transform group-hover/btn:scale-115 pointer-events-none">+</span>
+          </motion.button>
+        ))}
+
+      </div>
     </div>
   );
 }
