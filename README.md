@@ -489,13 +489,13 @@ world-cup-fantasy-2026/
 - [x] PWA configuration with manifest and icons
 
 ### 🔮 Phase 4 — Future Enhancements
-- [ ] Knockout stage matches (Round of 32 → Final)
-- [ ] Web Push Notifications (VAPID)
-- [ ] Player performance analytics & charts
+- [x] Knockout stage matches (Round of 32 → Final)
+- [x] Web Push Notifications (VAPID)
+- [x] Player performance analytics & charts
 - [ ] Head-to-head matchups between friends
 - [ ] Transfer market between matches
-- [ ] Season history and achievements
-- [ ] Dark/Light theme toggle
+- [x] Season history and achievements
+- [x] Dark/Light theme toggle
 - [ ] Deployment to Vercel + Railway
 
 ---
