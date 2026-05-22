@@ -99,8 +99,8 @@ export async function fetchMatchEvents(externalMatchId: string): Promise<void> {
         ? await prisma.player.findFirst({
             where: {
               OR: [
-                { name: { contains: goal.scorer.name.split(' ').pop() || '', mode: 'insensitive' } },
-                { displayName: { contains: goal.scorer.name.split(' ').pop() || '', mode: 'insensitive' } },
+                { name: { contains: goal.scorer.name.split(' ').pop() || '' } },
+                { displayName: { contains: goal.scorer.name.split(' ').pop() || '' } },
               ],
             },
           })
@@ -131,8 +131,8 @@ export async function fetchMatchEvents(externalMatchId: string): Promise<void> {
         const assister = await prisma.player.findFirst({
           where: {
             OR: [
-              { name: { contains: goal.assist.name.split(' ').pop() || '', mode: 'insensitive' } },
-              { displayName: { contains: goal.assist.name.split(' ').pop() || '', mode: 'insensitive' } },
+              { name: { contains: goal.assist.name.split(' ').pop() || '' } },
+              { displayName: { contains: goal.assist.name.split(' ').pop() || '' } },
             ],
           },
         });
@@ -168,8 +168,8 @@ export async function fetchMatchEvents(externalMatchId: string): Promise<void> {
         ? await prisma.player.findFirst({
             where: {
               OR: [
-                { name: { contains: booking.player.name.split(' ').pop() || '', mode: 'insensitive' } },
-                { displayName: { contains: booking.player.name.split(' ').pop() || '', mode: 'insensitive' } },
+                { name: { contains: booking.player.name.split(' ').pop() || '' } },
+                { displayName: { contains: booking.player.name.split(' ').pop() || '' } },
               ],
             },
           })

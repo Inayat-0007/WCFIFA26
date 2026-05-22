@@ -2,7 +2,7 @@ import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
 import { recalculateMatchPoints } from '../services/scoringEngine.service';
 import { emitScoreUpdate, emitMatchEvent } from '../sockets';
-import { EventType } from '@prisma/client';
+type EventType = 'GOAL' | 'ASSIST' | 'YELLOW_CARD' | 'RED_CARD' | 'PENALTY_MISS' | 'CLEAN_SHEET' | 'SUBSTITUTION';
 
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -67,7 +67,7 @@ model Match {
   kickoffTime DateTime
   venue       String?
   city        String?
-  status      MatchStatus @default(UPCOMING)
+  status      String @default("UPCOMING")
   homeScore   Int         @default(0)
   awayScore   Int         @default(0)
   homePenalties Int?
@@ -88,7 +88,7 @@ model Player {
   displayName String?
   country     String
   countryCode String?
-  position    Position
+  position    String
   image       String?
   price       Float    @default(8.0)
   basePoints  Int      @default(0)
@@ -152,7 +152,7 @@ model MatchEvent {
   id        String    @id @default(cuid())
   matchId   String
   playerId  String?
-  type      EventType
+  type      String
   minute    Int
   detail    String?
   createdAt DateTime  @default(now())
@@ -172,29 +172,6 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum MatchStatus {
-  UPCOMING
-  LIVE
-  COMPLETED
-  POSTPONED
-}
-
-enum Position {
-  GK
-  DEF
-  MID
-  FWD
-}
-
-enum EventType {
-  GOAL
-  ASSIST
-  YELLOW_CARD
-  RED_CARD
-  PENALTY_MISS
-  CLEAN_SHEET
-  SUBSTITUTION
-}
 
 model PushSubscription {
   id        String   @id @default(cuid())

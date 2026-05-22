@@ -1,6 +1,7 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient, Position } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+type Position = 'GK' | 'DEF' | 'MID' | 'FWD';
 
 
 export const getAllPlayers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -9,11 +10,11 @@ export const getAllPlayers = async (req: Request, res: Response, next: NextFunct
 
     const where: Record<string, unknown> = {};
     if (position) where.position = position as Position;
-    if (country) where.country = { contains: country as string, mode: 'insensitive' };
+    if (country) where.country = { contains: country as string };
     if (search) {
       where.OR = [
-        { name: { contains: search as string, mode: 'insensitive' } },
-        { country: { contains: search as string, mode: 'insensitive' } },
+        { name: { contains: search as string } },
+        { country: { contains: search as string } },
       ];
     }
 

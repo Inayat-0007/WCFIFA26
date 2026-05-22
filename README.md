@@ -214,13 +214,13 @@ Play with friends, build teams, track live scores, and compete on real-time lead
 ### Prerequisites
 
 - **Node.js** 18+ ([download](https://nodejs.org))
-- **PostgreSQL** database (free option: [Neon.tech](https://neon.tech))
+- SQLite (No database setup required! The app is pre-configured to use a local SQLite file `dev.db` automatically)
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/PragatiDevaliya/world-cup-fantasy-2026.git
-cd world-cup-fantasy-2026
+git clone https://github.com/Inayat-0007/WCFIFA26.git
+cd WCFIFA26
 ```
 
 ### 2. Backend Setup
@@ -229,45 +229,32 @@ cd world-cup-fantasy-2026
 cd backend
 npm install
 
-# Copy and configure environment variables
+# Copy environment variables
 cp .env.example .env
-# Edit .env → Add your DATABASE_URL (see Database Setup below)
 ```
 
-### 3. Database Setup
+Note: The `DATABASE_URL` in `backend/.env` is set to `file:./dev.db` by default.
 
-**Option A: Free Cloud Database (Recommended)**
-1. Sign up at [neon.tech](https://neon.tech) (free, no credit card)
-2. Create a new project → Copy the connection string
-3. Paste into `backend/.env`:
-```env
-DATABASE_URL=postgresql://neondb_owner:xxxxx@ep-xxx.aws.neon.tech/neondb?sslmode=require
-```
-
-**Option B: Local PostgreSQL**
-```sql
-CREATE DATABASE wcf2026;
-```
-```env
-DATABASE_URL=postgresql://postgres:your_password@localhost:5432/wcf2026
-```
-
-### 4. Run Migrations & Seed Data
+### 3. Database Setup & Seeding
 
 ```bash
 cd backend
-npm run db:migrate    # Creates all 10 tables
-npm run db:seed       # Seeds 48 matches + 225 players + demo accounts
+npx prisma db push    # Syncs SQLite schema & generates prisma client
+npm run db:seed       # Seeds 72 matches + 720 players + achievements + demo accounts
 ```
 
-### 5. Frontend Setup
+### 4. Frontend Setup
 
 ```bash
 cd ../frontend
-npm install
+npm install --legacy-peer-deps
+
+# Create environment variables
+echo NEXT_PUBLIC_API_URL=http://localhost:4000/api > .env.local
+echo NEXT_PUBLIC_SOCKET_URL=http://localhost:4000 >> .env.local
 ```
 
-### 6. Launch the App
+### 5. Launch the App
 
 ```bash
 # Terminal 1 — Backend API
@@ -277,7 +264,7 @@ cd backend && npm run dev     # → http://localhost:4000
 cd frontend && npm run dev    # → http://localhost:3000
 ```
 
-### 7. Login & Play! 🎉
+### 6. Login & Play! 🎉
 
 Open **http://localhost:3000** and use these seeded accounts:
 
@@ -285,6 +272,7 @@ Open **http://localhost:3000** and use these seeded accounts:
 |---|---|---|
 | **Admin** | `admin@worldcupfantasy.com` | `Admin@2026!` |
 | **Demo User** | `demo@worldcupfantasy.com` | `Demo@2026!` |
+| **Custom User** | `pragatid0902@gmail.com` | `123321ilup` |
 
 ---
 

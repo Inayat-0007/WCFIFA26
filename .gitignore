@@ -29,3 +29,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# SQLite databases
+*.db
+*.db-journal
+
