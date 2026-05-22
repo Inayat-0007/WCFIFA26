@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, X, Sparkles, Trophy, Trash2, HelpCircle, CheckCircle2, RotateCcw, Info } from 'lucide-react';
+import { Search, ChevronDown, X, Sparkles, Trophy, Trash2, HelpCircle, CheckCircle2, RotateCcw, Info, Brain } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/ui/Navbar';
 import { getPositionColor, getFlagByCountry, cn } from '@/lib/utils';
@@ -108,6 +108,7 @@ export default function TeamBuilderPage() {
   const [formation, setFormation] = useState<Formation>('4-4-2');
   const [showCeremonyModal, setShowCeremonyModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showCoachAdvice, setShowCoachAdvice] = useState(false);
 
 
   useEffect(() => {
@@ -159,6 +160,14 @@ export default function TeamBuilderPage() {
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.country.toLowerCase().includes(search.toLowerCase());
     return matchesPos && matchesSearch;
   });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+  };
 
   const addPlayer = (player: Player) => {
     if (selected.find((s) => s.id === player.id)) return;
@@ -267,13 +276,101 @@ export default function TeamBuilderPage() {
     );
   }
 
+  // Coach Advice Calculations
+  const selectedStats = selected.map(p => ({ player: p, ...getPlayerStats(p) }));
+  const avgForm = selected.length 
+    ? (selectedStats.reduce((sum, p) => sum + parseFloat(p.form), 0) / selected.length).toFixed(2) 
+    : '0.00';
+
+  const efficiency = selected.length 
+    ? Math.min(100, Math.round((budgetUsed / (selected.length * (BUDGET / 11))) * 100))
+    : 0;
+
+  const gks = selected.filter(p => p.position === 'GK').length;
+  const defs = selected.filter(p => p.position === 'DEF').length;
+  const mids = selected.filter(p => p.position === 'MID').length;
+  const fwds = selected.filter(p => p.position === 'FWD').length;
+
+  const limits = FORMATIONS[formation];
+  const balancePercent = Math.round(
+    (Math.min(gks, limits.GK) / limits.GK * 25) +
+    (Math.min(defs, limits.DEF) / limits.DEF * 25) +
+    (Math.min(mids, limits.MID) / limits.MID * 25) +
+    (Math.min(fwds, limits.FWD) / limits.FWD * 25)
+  );
+
+  const affordablePool = players.filter(p => !selected.find(s => s.id === p.id) && p.price <= budgetLeft);
+  const recommendedPlayers = affordablePool
+    .map(p => ({ player: p, stats: getPlayerStats(p) }))
+    .sort((a, b) => parseFloat(b.stats.form) - parseFloat(a.stats.form))
+    .slice(0, 3);
+
+  const captainSuggestion = selected.length
+    ? [...selected].map(p => ({ player: p, stats: getPlayerStats(p) }))
+        .sort((a, b) => parseFloat(b.stats.form) - parseFloat(a.stats.form))[0]?.player
+    : null;
+
+  const insights: { icon: string; title: string; desc: string }[] = [];
+  
+  if (selected.length < 11) {
+    insights.push({
+      icon: '⚠️',
+      title: 'Squad Incomplete',
+      desc: `You have selected ${selected.length}/11 players. Add ${11 - selected.length} more players to field a complete lineup.`
+    });
+  } else {
+    insights.push({
+      icon: '✅',
+      title: 'Squad Complete',
+      desc: 'Your squad has exactly 11 players. You are ready to assign captaincy and lock your team.'
+    });
+  }
+
+  if (gks === 0) {
+    insights.push({
+      icon: '🧤',
+      title: 'Goalkeeper Required',
+      desc: 'You do not have a Goalkeeper. Be sure to select 1 goalkeeper in your squad.'
+    });
+  }
+
+  if (budgetLeft < 0) {
+    insights.push({
+      icon: '💸',
+      title: 'Budget Overrun',
+      desc: `Your squad cost exceeds the 100 Cr limit by ${Math.abs(budgetLeft).toFixed(1)} Cr. Swap expensive players for form-budget alternatives.`
+    });
+  } else if (budgetLeft > 15 && selected.length === 11) {
+    insights.push({
+      icon: '💰',
+      title: 'Under-utilized Budget',
+      desc: `You have ${budgetLeft.toFixed(1)} Cr left over. Consider upgrading your lower-priced players to elite squad members.`
+    });
+  }
+
+  if (captainSuggestion) {
+    insights.push({
+      icon: '👑',
+      title: 'Captaincy Recommendation',
+      desc: `We recommend naming ${captainSuggestion.name} (${captainSuggestion.country}) as captain due to an outstanding form rating of ${getPlayerStats(captainSuggestion).form}.`
+    });
+  }
+
+  if (match) {
+    insights.push({
+      icon: '📈',
+      title: 'Matchup Advantage',
+      desc: `The match between ${match.homeTeam} and ${match.awayTeam} favors creative playmakers. Ensure you have players from both sides to balance clean sheet and attacking returns.`
+    });
+  }
+
   // Budget color scheme
   const budgetPercent = (budgetUsed / BUDGET) * 100;
   const budgetColor = budgetLeft < 0 
     ? 'bg-gradient-to-r from-red-600 to-rose-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]'
     : budgetLeft < 10 
       ? 'bg-gradient-to-r from-amber-500 to-red-500' 
-      : 'bg-gradient-to-r from-[#DC143C] to-[#FFD700]';
+      : 'bg-gradient-to-r from-[#e6b619] to-amber-500 shadow-[0_0_10px_rgba(230,182,25,0.3)]';
 
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white">
@@ -342,7 +439,7 @@ export default function TeamBuilderPage() {
                     className={cn(
                       'px-2.5 py-1 rounded-lg text-xs font-bold transition-all border',
                       formation === f 
-                        ? 'bg-[#DC143C]/20 border-[#DC143C] text-white' 
+                        ? 'bg-primary/20 border-primary text-white font-bold' 
                         : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10 hover:text-white'
                     )}
                   >
@@ -353,7 +450,8 @@ export default function TeamBuilderPage() {
             </div>
 
             {/* Pitch graphic container */}
-            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl" style={{ minHeight: '520px' }}>
+            <div className="pitch-3d-container w-full">
+              <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl pitch-3d-board" style={{ minHeight: '520px' }}>
               <div className="absolute inset-0 pitch-bg opacity-90" />
               
               {/* Glowing Red Vignette on Drag */}
@@ -468,20 +566,28 @@ export default function TeamBuilderPage() {
 
               </div>
             </div>
+          </div>
 
             {/* Action Buttons */}
             <div className="flex gap-3">
               <button
                 onClick={() => { setSelected([]); setCaptainId(''); setVcId(''); playSound('remove'); }}
                 disabled={selected.length === 0}
-                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-xs"
               >
                 <RotateCcw className="w-4 h-4" /> Reset
               </button>
 
               <button
+                onClick={() => { setShowCoachAdvice(true); playSound('success'); }}
+                className="px-4 py-3 bg-gradient-to-r from-primary/10 to-amber-500/10 hover:from-primary/20 hover:to-amber-500/20 border border-primary/30 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all text-[#e6b619] shadow-[0_0_15px_rgba(230,182,25,0.05)] hover:shadow-[0_0_15px_rgba(230,182,25,0.15)] text-xs"
+              >
+                <Brain className="w-4.5 h-4.5 text-[#e6b619] animate-pulse" /> AI Coach
+              </button>
+
+              <button
                 onClick={() => { setFilter(''); setShowDrawer(true); }}
-                className="flex-1 lg:hidden py-3 rounded-2xl font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all text-center"
+                className="flex-1 lg:hidden py-3 rounded-2xl font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all text-center text-xs"
               >
                 + Browse Selection
               </button>
@@ -490,11 +596,11 @@ export default function TeamBuilderPage() {
                 onClick={openSaveCeremony}
                 disabled={selected.length !== 11 || budgetLeft < 0 || isLocked}
                 className={cn(
-                  'flex-1 py-3 rounded-2xl font-black tracking-wide text-white transition-all transform hover:scale-[1.01] hover:brightness-115 active:scale-[0.99] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-center'
+                  'flex-1 py-3 rounded-2xl font-black tracking-wide text-white transition-all transform hover:scale-[1.01] hover:brightness-115 active:scale-[0.99] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-center text-xs'
                 )}
                 style={{
-                  background: 'linear-gradient(135deg, #DC143C, #8B0000)',
-                  boxShadow: selected.length === 11 && budgetLeft >= 0 ? '0 4px 20px rgba(220, 20, 60, 0.4)' : 'none',
+                  background: 'linear-gradient(135deg, #e6b619, #b45309)',
+                  boxShadow: selected.length === 11 && budgetLeft >= 0 ? '0 4px 20px rgba(230, 182, 25, 0.4)' : 'none',
                 }}
               >
                 {isLocked ? 'Match Locked' : selected.length === 11 ? 'Save & Assign Captains 👑' : `Select ${11 - selected.length} more player(s)`}
@@ -517,7 +623,7 @@ export default function TeamBuilderPage() {
                   className={cn(
                     'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap',
                     filter === pos 
-                      ? 'bg-[#DC143C]/20 border-[#DC143C] text-white' 
+                      ? 'bg-primary/20 border-primary text-white' 
                       : 'bg-white/5 border-transparent text-gray-400 hover:text-white'
                   )}
                 >
@@ -533,7 +639,7 @@ export default function TeamBuilderPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search player or team name..."
-                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs placeholder-gray-500 focus:border-[#DC143C]/50 transition-colors"
+                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs placeholder-gray-500 focus:border-primary/50 transition-colors"
               />
             </div>
 
@@ -560,11 +666,12 @@ export default function TeamBuilderPage() {
                     <motion.div
                       key={player.id}
                       className={cn(
-                        'flex items-center justify-between p-2.5 rounded-xl border transition-all hover:bg-white/5',
+                        'spotlight-card-interactive flex items-center justify-between p-2.5 rounded-xl border transition-all hover:bg-white/5',
                         isSelected 
-                          ? 'bg-[#DC143C]/10 border-[#DC143C]/30' 
+                          ? 'bg-primary/10 border-primary/30' 
                           : 'bg-white/[0.02] border-white/5'
                       )}
+                      onMouseMove={handleMouseMove}
                       layoutId={`player-card-${player.id}`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -589,7 +696,7 @@ export default function TeamBuilderPage() {
                           className={cn(
                             'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold border transition-all',
                             isSelected
-                              ? 'bg-[#DC143C]/20 border-[#DC143C]/50 text-[#DC143C] hover:bg-[#DC143C]/30'
+                              ? 'bg-accent/20 border-accent/50 text-accent hover:bg-accent/30'
                               : canAfford && selected.length < 11
                                 ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
                                 : 'bg-white/5 border-transparent text-gray-600 cursor-not-allowed'
@@ -656,7 +763,7 @@ export default function TeamBuilderPage() {
                     className={cn(
                       'px-3 py-1 rounded-xl text-xs font-bold border transition-all whitespace-nowrap',
                       filter === pos 
-                        ? 'bg-[#DC143C]/20 border-[#DC143C] text-white' 
+                        ? 'bg-primary/20 border-primary text-white' 
                         : 'bg-white/5 border-transparent text-gray-400 hover:text-white'
                     )}
                   >
@@ -688,11 +795,12 @@ export default function TeamBuilderPage() {
                     <div
                       key={player.id}
                       className={cn(
-                        'flex items-center justify-between p-3 rounded-xl border transition-all',
+                        'spotlight-card-interactive flex items-center justify-between p-3 rounded-xl border transition-all',
                         isSelected 
-                          ? 'bg-[#DC143C]/10 border-[#DC143C]/30' 
+                          ? 'bg-primary/10 border-primary/30' 
                           : 'bg-white/[0.02] border-white/5'
                       )}
+                      onMouseMove={handleMouseMove}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{getFlagByCountry(player.country)}</span>
@@ -716,7 +824,7 @@ export default function TeamBuilderPage() {
                           className={cn(
                             'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold border',
                             isSelected
-                              ? 'bg-[#DC143C]/20 border-[#DC143C]/50 text-[#DC143C]'
+                              ? 'bg-accent/20 border-accent/50 text-accent'
                               : canAfford && selected.length < 11
                                 ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
                                 : 'bg-white/5 border-transparent text-gray-600 cursor-not-allowed'
@@ -847,10 +955,10 @@ export default function TeamBuilderPage() {
                 <button
                   onClick={submitTeam}
                   disabled={saving || !captainId || !vcId}
-                  className="flex-1 py-2.5 rounded-xl font-extrabold text-white transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 py-2.5 rounded-xl font-extrabold text-[#0B0B0C] transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
-                    background: 'linear-gradient(135deg, #DC143C, #8B0000)',
-                    boxShadow: '0 4px 15px rgba(220, 20, 60, 0.3)',
+                    background: 'linear-gradient(135deg, #e6b619, #b45309)',
+                    boxShadow: '0 4px 15px rgba(230, 182, 25, 0.3)',
                   }}
                 >
                   {saving ? 'Saving...' : 'Lock Squad & Save Team 🏆'}
@@ -859,6 +967,174 @@ export default function TeamBuilderPage() {
 
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating AI Coach Advice button */}
+      <motion.button
+        onClick={() => { setShowCoachAdvice(true); playSound('success'); }}
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#e6b619] to-[#D4AF37] text-dark-900 font-extrabold rounded-full px-5 py-3.5 shadow-[0_0_20px_rgba(230,182,25,0.4)] flex items-center gap-2 border border-[#e6b619]/40 hover:scale-105 active:scale-95 transition-all group"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', delay: 1 }}
+      >
+        <Sparkles className="w-5 h-5 text-dark-900 animate-pulse group-hover:rotate-12 transition-transform" />
+        <span className="font-display tracking-tight text-xs uppercase font-extrabold">AI Coach Advice</span>
+      </motion.button>
+
+      {/* AI Coach Advice Drawer */}
+      <AnimatePresence>
+        {showCoachAdvice && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 z-50 backdrop-blur-md"
+              onClick={() => setShowCoachAdvice(false)}
+            />
+            
+            {/* Side Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="fixed top-0 right-0 bottom-0 w-full md:w-[450px] z-50 glass-gold-premium p-6 overflow-y-auto border-l border-[#e6b619]/20 flex flex-col justify-between"
+              style={{ background: 'rgba(15, 15, 21, 0.98)' }}
+            >
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#e6b619]/10 border border-[#e6b619]/30 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-[#e6b619]" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black tracking-wide font-display text-[#e6b619]">AI Coach Advisor</h3>
+                      <p className="text-[10px] text-gray-400 font-sans">2026 Smart Tactics Engine</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => { setShowCoachAdvice(false); playSound('tick'); }} 
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Advice content */}
+                <div className="space-y-6">
+                  {/* Squad Form / Rating Metrics */}
+                  <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4">
+                    <h4 className="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider flex items-center gap-2">
+                      <Trophy className="w-3.5 h-3.5 text-[#e6b619]" /> Squad Metrics
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Avg Form Rating</p>
+                        <p className="text-xl font-black text-green-400 mt-1">⭐ {avgForm}</p>
+                      </div>
+                      <div className="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Efficiency</p>
+                        <p className="text-xl font-black text-[#e6b619] mt-1">{efficiency}%</p>
+                      </div>
+                    </div>
+                    {/* Form Progress Bar */}
+                    <div className="mt-4">
+                      <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                        <span>Tactical Balance</span>
+                        <span>{balancePercent}%</span>
+                      </div>
+                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                          className="h-full bg-gradient-to-r from-amber-500 to-[#e6b619] rounded-full" 
+                          style={{ width: `${balancePercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tactical Insights List */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider flex items-center gap-2">
+                      <Info className="w-3.5 h-3.5 text-blue-400" /> Coach Insights
+                    </h4>
+                    
+                    {insights.map((insight, idx) => (
+                      <div 
+                        key={idx}
+                        className="p-3.5 rounded-xl border bg-white/[0.01] border-white/5 flex items-start gap-2.5"
+                      >
+                        <span className="text-sm mt-0.5">{insight.icon}</span>
+                        <div className="text-xs leading-relaxed text-gray-300">
+                          <span className="font-bold text-white block mb-0.5">{insight.title}</span>
+                          {insight.desc}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Recommended Affordable Additions */}
+                  {recommendedPlayers.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 text-[#e6b619]" /> Suggested Picks
+                      </h4>
+                      
+                      <div className="space-y-2">
+                        {recommendedPlayers.map(({ player, stats }) => {
+                          const canAfford = budgetLeft >= player.price;
+                          return (
+                            <div 
+                              key={player.id}
+                              className="spotlight-card-interactive flex items-center justify-between p-3 rounded-xl border bg-black/30 border-white/5 hover:border-[#e6b619]/30 transition-all"
+                              onMouseMove={handleMouseMove}
+                            >
+                              <div className="flex items-center gap-2.5">
+                               <span className="text-2xl">{getFlagByCountry(player.country)}</span>
+                               <div>
+                                 <p className="font-bold text-xs text-white leading-tight">{player.name}</p>
+                                 <div className="flex items-center gap-1.5 mt-0.5">
+                                   <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
+                                     {player.position}
+                                   </span>
+                                   <span className="text-[10px] text-gray-400">{player.country}</span>
+                                 </div>
+                               </div>
+                             </div>
+
+                             <div className="flex items-center gap-3">
+                               <div className="text-right">
+                                 <p className="text-[10px] text-green-400 font-bold">⭐ {stats.form}</p>
+                                 <p className="text-xs font-black text-[#e6b619]">{player.price} Cr</p>
+                               </div>
+                               <button
+                                 onClick={() => { addPlayer(player); playSound('pop'); }}
+                                 disabled={selected.length >= 11 || !canAfford}
+                                 className="w-7 h-7 rounded-lg bg-[#e6b619]/20 hover:bg-[#e6b619]/30 border border-[#e6b619]/40 text-[#e6b619] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm font-bold transition-all"
+                               >
+                                 +
+                               </button>
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   </div>
+                 )}
+               </div>
+             </div>
+
+             {/* Footer Lock Indicator */}
+             <div className="mt-6 pt-4 border-t border-white/5 text-center">
+               <p className="text-[10px] text-gray-500 font-medium">
+                 AI coach updates automatically as you swap squad members.
+               </p>
+             </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

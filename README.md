@@ -26,13 +26,21 @@ Play with friends, build teams, track live scores, and compete on real-time lead
 
 <div align="center">
 
-| Dashboard | Team Builder |
+| Splash Page | Sign In |
 |:-:|:-:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Team Builder](docs/screenshots/team-builder.png) |
+| ![Splash Page](docs/screenshots/splash.png) | ![Sign In](docs/screenshots/login.png) |
 
-| Live Match Center | Leaderboard |
+| Dashboard Hub | Team Builder Pitch |
 |:-:|:-:|
-| ![Live Match](docs/screenshots/live-match.png) | ![Leaderboard](docs/screenshots/leaderboard.png) |
+| ![Dashboard Hub](docs/screenshots/dashboard.png) | ![Team Builder Pitch](docs/screenshots/team-builder.png) |
+
+| Captains Selection | Global Leaderboard |
+|:-:|:-:|
+| ![Captains Selection](docs/screenshots/captain-modal.png) | ![Global Leaderboard](docs/screenshots/leaderboard.png) |
+
+| Leagues Hub | Live Match Center |
+|:-:|:-:|
+| ![Leagues Hub](docs/screenshots/leagues.png) | ![Live Match Center](docs/screenshots/live-match.png) |
 
 </div>
 
@@ -40,34 +48,30 @@ Play with friends, build teams, track live scores, and compete on real-time lead
 
 ## ✨ Features
 
-### 🏆 Core Gameplay
-- **Dream11-Style Team Builder** — Select 11 players on a football pitch view with 100-credit budget
-- **Captain & Vice-Captain** — 2× and 1.5× point multipliers for strategic picks
-- **48 Group Stage Matches** — All FIFA World Cup 2026 matches pre-loaded
-- **225+ Real Players** — Stars from all 48 qualified nations with accurate positions and pricing
+### 🏆 Next-Gen Immersive UI (Stitch MCP Level)
+- **Dynamic Mouse Glow Spotlight** — Custom cursor-coordinate gradient halos hover and highlight match cards, player cards, and rosters.
+- **Web Audio Soundscapes** — Interactive browser-synthesized minor/major hybrid chord welcome chimes and action confirmation chirps.
+- **Top Scroll Progress Indicator** — Glowing golden scroll tracker with smooth Framer Motion spring physics.
+- **Golden Gradient Scrollbars** — Customized scrollbar thumbs with responsive size scaling.
+- **Coordinate-based Click Ripples** — Multiple golden ring expansion particles generated at mouse click coordinate points.
+
+### ⚽ Core Gameplay & Roster
+- **Dream11-Style Team Builder** — Roster builder with football pitch view and 100-credit budget check.
+- **Captain & Vice-Captain** — Assign 2× and 1.5× multipliers to players with instant updates.
+- **Full 104 Matches** — Complete Group Stage schedules preloaded.
+- **720 Seeded Real Players** — Complete 15-player squads (2 GK, 5 DEF, 5 MID, 3 FWD) across all 48 qualified countries.
 
 ### ⚡ Real-Time Experience
-- **Live Score Updates** — Instant score changes via Socket.IO WebSockets
-- **Fantasy Points Tracker** — Watch your points update as goals are scored
-- **Real-Time Leaderboard** — Rankings shift live during matches
-- **Push Notifications** — Goals, match events, and deadline alerts
+- **Live Score Updates** — Instant scores and goal push triggers via Socket.IO.
+- **Fantasy Points Tracker** — Real-time recalculation of leaderboard points as matches progress.
+- **Real-Time Leaderboard** — Group-wide and global player rankings updated in real-time.
 
-### 🏟️ League System
-- **Private Leagues** — Create leagues for up to 10 friends
-- **Invite Codes** — 6-character codes to share with your group
-- **Multiple Leagues** — Join as many leagues as you want
-- **League Leaderboards** — Separate rankings per league
+### 🏟️ Leagues & Invites
+- **Private Leagues** — Create custom leagues and invite friends using unique 6-character codes.
+- **Global League** — Automatically join the global league pool to compete with all players.
 
-### 🔧 Admin Dashboard
-- **Match Management** — Update scores, change match status
-- **Event Triggers** — Add goals, assists, cards with player selection
-- **Player Management** — Edit prices and player details
-- **User & League Overview** — Complete platform analytics
-
-### 📱 Cross-Platform
-- **Progressive Web App (PWA)** — Install on any device
-- **Responsive Design** — Optimized for mobile, tablet, and desktop
-- **Works on** — Chrome, Safari, Firefox, Edge + Android + iOS
+### 🔧 Admin Panel
+- **Match Engine** — Trigger goals, assists, yellow/red cards, or penalty misses, and dynamically recalculate fantasy points.
 
 ---
 

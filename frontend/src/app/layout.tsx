@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { Toaster } from 'react-hot-toast';
+import { ScrollAndClickEffects } from '@/components/ui/ScrollAndClickEffects';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryProvider>
           <AuthProvider>
             <SocketProvider>
+              <ScrollAndClickEffects />
               {children}
               <Toaster
                 position="top-right"
@@ -69,3 +71,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
