@@ -19,6 +19,9 @@ import playerRoutes from './routes/player.routes';
 import teamRoutes from './routes/team.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
 import adminRoutes from './routes/admin.routes';
+import notificationRoutes from './routes/notification.routes';
+import userRoutes from './routes/user.routes';
+
 import { syncEventsForLiveMatches } from './services/footballApi.service';
 
 const app = express();
@@ -62,6 +65,8 @@ app.use('/api/players', playerRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/users', userRoutes);
 
 // ─── SOCKET.IO ─────────────────────────────────────────────────────────────────
 initializeSocket(httpServer);

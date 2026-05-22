@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Trophy, Users, BarChart3, User, Shield, LogOut } from 'lucide-react';
+import { Home, Trophy, Users, BarChart3, User, Shield, LogOut, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -40,6 +41,7 @@ const playClickSound = () => {
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
 
   const handleLinkClick = () => {
@@ -105,6 +107,21 @@ export function Navbar() {
 
         {/* Profile Card & Logout */}
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              playClickSound();
+              toggleTheme();
+            }}
+            className="flex items-center justify-center p-2.5 rounded-xl bg-white/5 hover:bg-primary-500/10 border border-white/5 hover:border-primary-500/20 text-gray-400 hover:text-primary transition-all duration-300"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-primary" />
+            ) : (
+              <Moon className="w-4 h-4 text-primary" />
+            )}
+          </button>
+
           <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/[0.02] border border-white/5">
             <span className="text-xl select-none">{user?.avatar || '⚽'}</span>
             <span className="text-sm font-bold text-gray-200">{user?.name}</span>

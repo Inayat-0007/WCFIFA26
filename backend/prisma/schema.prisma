@@ -26,6 +26,9 @@ model User {
   memberships    LeagueMember[]
   fantasyTeams   FantasyTeam[]
   notifications  Notification[]
+  pushSubscriptions PushSubscription[]
+  achievements   UserAchievement[]
+  seasonHistory  SeasonHistory[]
 }
 
 model League {
@@ -67,6 +70,8 @@ model Match {
   status      MatchStatus @default(UPCOMING)
   homeScore   Int         @default(0)
   awayScore   Int         @default(0)
+  homePenalties Int?
+  awayPenalties Int?
   minute      Int?
   externalId  String?     @unique
   createdAt   DateTime    @default(now())
@@ -190,3 +195,47 @@ enum EventType {
   CLEAN_SHEET
   SUBSTITUTION
 }
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  title       String            @unique
+  description String
+  icon        String
+  pointsAwarded Int             @default(0)
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model SeasonHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  season      String
+  rank        Int
+  totalPoints Int
+  percentile  Float?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+

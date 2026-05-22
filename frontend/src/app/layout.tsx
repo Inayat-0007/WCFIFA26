@@ -3,6 +3,7 @@ import { Outfit } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { SocketProvider } from '@/context/SocketContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { Toaster } from 'react-hot-toast';
 import { ScrollAndClickEffects } from '@/components/ui/ScrollAndClickEffects';
@@ -12,7 +13,7 @@ const outfit = Outfit({
   weight: ['300', '400', '500', '600', '700', '800', '900'],
   variable: '--font-outfit',
   display: 'swap',
-});
+  });
 
 export const metadata: Metadata = {
   title: { default: 'World Cup Fantasy 2026', template: '%s | World Cup Fantasy 2026' },
@@ -44,29 +45,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className={`${outfit.className} bg-dark-900 text-white antialiased`}>
-        <QueryProvider>
-          <AuthProvider>
-            <SocketProvider>
-              <ScrollAndClickEffects />
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  style: {
-                    background: '#1A1A24',
-                    color: '#fff',
-                    border: '1px solid rgba(220, 20, 60, 0.3)',
-                    borderRadius: '12px',
-                    fontFamily: 'Outfit, sans-serif',
-                  },
-                  success: { iconTheme: { primary: '#FFD700', secondary: '#1A1A24' } },
-                  error: { iconTheme: { primary: '#DC143C', secondary: '#fff' } },
-                }}
-              />
-            </SocketProvider>
-          </AuthProvider>
-        </QueryProvider>
+      <body className={`${outfit.className} antialiased`}>
+        <ThemeProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <SocketProvider>
+                <ScrollAndClickEffects />
+                {children}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    style: {
+                      background: '#1A1A24',
+                      color: '#fff',
+                      border: '1px solid rgba(220, 20, 60, 0.3)',
+                      borderRadius: '12px',
+                      fontFamily: 'Outfit, sans-serif',
+                    },
+                    success: { iconTheme: { primary: '#FFD700', secondary: '#1A1A24' } },
+                    error: { iconTheme: { primary: '#DC143C', secondary: '#fff' } },
+                  }}
+                />
+              </SocketProvider>
+            </AuthProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

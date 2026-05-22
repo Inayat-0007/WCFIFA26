@@ -10,6 +10,7 @@ import { getPositionColor, getFlagByCountry, cn } from '@/lib/utils';
 import api from '@/lib/api';
 import type { Match, Player, Position } from '@/types';
 import toast from 'react-hot-toast';
+import { PlayerPerformanceChart } from '@/components/players/PlayerPerformanceChart';
 
 const BUDGET = 100;
 
@@ -109,6 +110,29 @@ export default function TeamBuilderPage() {
   const [showCeremonyModal, setShowCeremonyModal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showCoachAdvice, setShowCoachAdvice] = useState(false);
+  const [selectedDetailPlayerId, setSelectedDetailPlayerId] = useState<string | null>(null);
+  const [detailPlayer, setDetailPlayer] = useState<any | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  const handlePlayerClick = useCallback(async (playerId: string) => {
+    playSound('tick');
+    setSelectedDetailPlayerId(playerId);
+    setLoadingDetail(true);
+    setDetailPlayer(null);
+    try {
+      const response = await api.get(`/players/${playerId}`);
+      if (response.data && response.data.success) {
+        setDetailPlayer(response.data.data);
+      } else {
+        toast.error('Could not load player details');
+      }
+    } catch (error) {
+      console.error('Error fetching player detail:', error);
+      toast.error('Failed to fetch player details');
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -517,6 +541,7 @@ export default function TeamBuilderPage() {
                   awayTeam={match?.awayTeam || ''}
                   onDragStart={() => setIsDragging(true)}
                   onDragEnd={() => setIsDragging(false)}
+                  onPlayerClick={handlePlayerClick}
                 />
 
                 {/* Midfielders (MID) */}
@@ -532,6 +557,7 @@ export default function TeamBuilderPage() {
                   awayTeam={match?.awayTeam || ''}
                   onDragStart={() => setIsDragging(true)}
                   onDragEnd={() => setIsDragging(false)}
+                  onPlayerClick={handlePlayerClick}
                 />
 
                 {/* Defenders (DEF) */}
@@ -547,6 +573,7 @@ export default function TeamBuilderPage() {
                   awayTeam={match?.awayTeam || ''}
                   onDragStart={() => setIsDragging(true)}
                   onDragEnd={() => setIsDragging(false)}
+                  onPlayerClick={handlePlayerClick}
                 />
 
                 {/* Goalkeeper (GK) */}
@@ -562,6 +589,7 @@ export default function TeamBuilderPage() {
                   awayTeam={match?.awayTeam || ''}
                   onDragStart={() => setIsDragging(true)}
                   onDragEnd={() => setIsDragging(false)}
+                  onPlayerClick={handlePlayerClick}
                 />
 
               </div>
@@ -674,7 +702,10 @@ export default function TeamBuilderPage() {
                       onMouseMove={handleMouseMove}
                       layoutId={`player-card-${player.id}`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div 
+                        onClick={() => handlePlayerClick(player.id)}
+                        className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-85"
+                      >
                         <span className="text-2xl select-none">{getFlagByCountry(player.country)}</span>
                         <div className="min-w-0 leading-tight">
                           <p className="font-bold text-xs truncate">{player.name}</p>
@@ -802,7 +833,10 @@ export default function TeamBuilderPage() {
                       )}
                       onMouseMove={handleMouseMove}
                     >
-                      <div className="flex items-center gap-3">
+                      <div 
+                        onClick={() => handlePlayerClick(player.id)}
+                        className="flex items-center gap-3 cursor-pointer hover:opacity-85"
+                      >
                         <span className="text-2xl">{getFlagByCountry(player.country)}</span>
                         <div>
                           <p className="font-bold text-xs">{player.name}</p>
@@ -965,6 +999,92 @@ export default function TeamBuilderPage() {
                 </button>
               </div>
 
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* PLAYER DETAILS MODAL */}
+      <AnimatePresence>
+        {selectedDetailPlayerId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setSelectedDetailPlayerId(null)}
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className="relative w-full max-w-xl glass border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col max-h-[85vh] z-50 bg-dark-900 text-white"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedDetailPlayerId(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {loadingDetail ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-xs text-gray-400">Loading player analytics...</p>
+                </div>
+              ) : detailPlayer ? (
+                <>
+                  {/* Header */}
+                  <div className="flex items-center gap-4 mb-5 pb-4 border-b border-white/5">
+                    <span className="text-4xl">{getFlagByCountry(detailPlayer.country)}</span>
+                    <div className="text-left">
+                      <h3 className="text-xl font-black tracking-wide text-white">{detailPlayer.name}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={cn('text-[10px] px-1.5 py-0.5 rounded font-bold border uppercase', getPositionColor(detailPlayer.position))}>
+                          {detailPlayer.position}
+                        </span>
+                        <span className="text-xs text-gray-400">{detailPlayer.country}</span>
+                        <span className="text-xs text-[#FFD700] font-black">💰 {detailPlayer.price} Cr</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body - Metrics Grid */}
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    {[
+                      { label: 'Form Rating', value: detailPlayer.stats?.form || '0.0', icon: '⭐' },
+                      { label: 'Selected %', value: `${detailPlayer.stats?.selectedPercent || '0'}%`, icon: '📈' },
+                      { label: 'Total Points', value: detailPlayer.stats?.totalPoints || 0, icon: '🏆' },
+                      { label: 'Goals', value: detailPlayer.stats?.goals || 0, icon: '⚽' },
+                      { label: 'Assists', value: detailPlayer.stats?.assists || 0, icon: '👟' },
+                      { label: 'Clean Sheets', value: detailPlayer.stats?.cleanSheets || 0, icon: '🧤' },
+                    ].map(({ label, value, icon }) => (
+                      <div key={label} className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 text-center">
+                        <div className="text-xl mb-1">{icon}</div>
+                        <p className="text-lg font-black text-white">{value}</p>
+                        <p className="text-[10px] text-gray-400">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Chart section */}
+                  <div className="mt-2">
+                    <PlayerPerformanceChart
+                      matchPlayers={detailPlayer.matchPlayers || []}
+                      playerCountry={detailPlayer.country}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-400">Failed to load player details.</p>
+                </div>
+              )}
             </motion.div>
           </div>
         )}
@@ -1154,7 +1274,8 @@ function PitchRow({
   homeTeam,
   awayTeam,
   onDragStart,
-  onDragEnd
+  onDragEnd,
+  onPlayerClick
 }: {
   players: SelectedPlayer[]; 
   limit: number; 
@@ -1167,6 +1288,7 @@ function PitchRow({
   awayTeam: string;
   onDragStart: () => void;
   onDragEnd: () => void;
+  onPlayerClick?: (id: string) => void;
 }) {
   const emptyCount = Math.max(0, limit - players.length);
   
@@ -1262,7 +1384,7 @@ function PitchRow({
                   )}
 
                   {/* SVG Render */}
-                  <div className="relative">
+                  <div className="relative cursor-pointer" onClick={() => onPlayerClick?.(player.id)}>
                     <svg className={cn(
                       "w-12 h-12 md:w-14 md:h-14 drop-shadow-md transition-transform group-hover:scale-110",
                       isCaptain && "filter drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]",

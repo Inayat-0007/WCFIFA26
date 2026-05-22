@@ -382,6 +382,34 @@ const groupMatches = [
   { home: 'Honduras', away: 'Turkey', group: 'L', daysOffset: 13 },
 ];
 
+const knockoutMatches = [
+  // Round of 32
+  { home: 'Argentina', away: 'Mexico', round: 'Round of 32', daysOffset: 15, venue: 'Gillette Stadium', city: 'Foxborough, MA' },
+  { home: 'Germany', away: 'Australia', round: 'Round of 32', daysOffset: 15, venue: 'SoFi Stadium', city: 'Inglewood, CA' },
+  { home: 'Spain', away: 'Japan', round: 'Round of 32', daysOffset: 16, venue: 'MetLife Stadium', city: 'East Rutherford, NJ' },
+  { home: 'France', away: 'Switzerland', round: 'Round of 32', daysOffset: 16, venue: 'Mercedes-Benz Stadium', city: 'Atlanta, GA' },
+  { home: 'Portugal', away: 'Italy', round: 'Round of 32', daysOffset: 17, venue: 'Hard Rock Stadium', city: 'Miami Gardens, FL' },
+  { home: 'Belgium', away: 'Netherlands', round: 'Round of 32', daysOffset: 17, venue: 'AT&T Stadium', city: 'Arlington, TX' },
+  { home: 'Croatia', away: 'Morocco', round: 'Round of 32', daysOffset: 18, venue: 'Arrowhead Stadium', city: 'Kansas City, MO' },
+  { home: 'South Korea', away: 'Denmark', round: 'Round of 32', daysOffset: 18, venue: 'BC Place', city: 'Vancouver, BC' },
+  // Round of 16
+  { home: 'Argentina', away: 'Germany', round: 'Round of 16', daysOffset: 20, venue: 'Lincoln Financial Field', city: 'Philadelphia, PA' },
+  { home: 'Spain', away: 'France', round: 'Round of 16', daysOffset: 20, venue: 'NRG Stadium', city: 'Houston, TX' },
+  { home: 'Portugal', away: 'Belgium', round: 'Round of 16', daysOffset: 21, venue: 'Lumen Field', city: 'Seattle, WA' },
+  { home: 'Croatia', away: 'South Korea', round: 'Round of 16', daysOffset: 21, venue: 'BMO Field', city: 'Toronto, ON' },
+  // Quarter-finals
+  { home: 'Argentina', away: 'France', round: 'Quarter-finals', daysOffset: 23, venue: 'SoFi Stadium', city: 'Inglewood, CA' },
+  { home: 'Portugal', away: 'Croatia', round: 'Quarter-finals', daysOffset: 24, venue: 'MetLife Stadium', city: 'East Rutherford, NJ' },
+  // Semi-finals
+  { home: 'Argentina', away: 'Portugal', round: 'Semi-finals', daysOffset: 26, venue: 'Mercedes-Benz Stadium', city: 'Atlanta, GA' },
+  { home: 'France', away: 'Croatia', round: 'Semi-finals', daysOffset: 27, venue: 'AT&T Stadium', city: 'Arlington, TX' },
+  // Third Place Play-off
+  { home: 'Portugal', away: 'Croatia', round: 'Third-place play-off', daysOffset: 29, venue: 'Hard Rock Stadium', city: 'Miami Gardens, FL' },
+  // Final
+  { home: 'Argentina', away: 'France', round: 'Final', daysOffset: 30, venue: 'MetLife Stadium', city: 'East Rutherford, NJ' }
+];
+
+
 interface NamePool {
   first: string[];
   last: string[];
@@ -611,7 +639,85 @@ async function main() {
     });
     matchCount++;
   }
-  console.log(`✅ ${matchCount} matches seeded`);
+  console.log(`✅ ${matchCount} group matches seeded`);
+
+  // Seed Knockout matches
+  let koCount = 0;
+  for (const m of knockoutMatches) {
+    const kickoff = new Date(startDate);
+    kickoff.setDate(startDate.getDate() + m.daysOffset);
+    const id = `match-${m.home.toLowerCase().replace(/\s+/g, '-')}-vs-${m.away.toLowerCase().replace(/\s+/g, '-')}`;
+    await prisma.match.upsert({
+      where: { id },
+      update: {
+        round: m.round,
+        kickoffTime: kickoff,
+      },
+      create: {
+        id,
+        homeTeam: m.home,
+        awayTeam: m.away,
+        round: m.round,
+        kickoffTime: kickoff,
+        status: 'UPCOMING',
+        venue: m.venue,
+        city: m.city,
+      },
+    });
+    koCount++;
+  }
+  console.log(`✅ ${koCount} knockout matches seeded`);
+
+  // Seed Achievements
+  const defaultAchievements = [
+    { id: 'ach-draft-king', title: 'Draft King', description: 'Select a complete 11-player squad.', icon: '👑', pointsAwarded: 50 },
+    { id: 'ach-captain-marvel', title: 'Captain Marvel', description: 'Your captain scores a goal in a match.', icon: '⚡', pointsAwarded: 100 },
+    { id: 'ach-points-centurion', title: 'Points Centurion', description: 'Score 100+ points in a single matchday.', icon: '💯', pointsAwarded: 200 },
+    { id: 'ach-league-titan', title: 'League Titan', description: 'Create or join a private league.', icon: '🛡️', pointsAwarded: 50 },
+    { id: 'ach-clean-sheet', title: 'Clean Sheet Master', description: 'Keep a clean sheet with your Goalkeeper.', icon: '🧤', pointsAwarded: 100 }
+  ];
+
+  for (const ach of defaultAchievements) {
+    await prisma.achievement.upsert({
+      where: { id: ach.id },
+      update: {
+        title: ach.title,
+        description: ach.description,
+        icon: ach.icon,
+        pointsAwarded: ach.pointsAwarded
+      },
+      create: ach
+    });
+  }
+  console.log('✅ Default achievements seeded');
+
+  // Seed user achievements for Demo & Pragati
+  const targetUsers = [demoUser.id, pragatiUser.id];
+  for (const userId of targetUsers) {
+    // Unlock Draft King
+    await prisma.userAchievement.upsert({
+      where: { userId_achievementId: { userId, achievementId: 'ach-draft-king' } },
+      update: {},
+      create: { userId, achievementId: 'ach-draft-king' }
+    });
+
+    // Unlock League Titan
+    await prisma.userAchievement.upsert({
+      where: { userId_achievementId: { userId, achievementId: 'ach-league-titan' } },
+      update: {},
+      create: { userId, achievementId: 'ach-league-titan' }
+    });
+
+    // Seed Season History
+    await prisma.seasonHistory.deleteMany({ where: { userId } });
+    await prisma.seasonHistory.createMany({
+      data: [
+        { userId, season: 'Qatar 2022', rank: 1420, totalPoints: 842, percentile: 92.5 },
+        { userId, season: 'Russia 2018', rank: 2840, totalPoints: 712, percentile: 85.1 }
+      ]
+    });
+  }
+  console.log('✅ User achievements & past histories seeded');
   console.log('🎉 Database seeding complete!');
   console.log('');
   console.log('📧 Custom login: pragatid0902@gmail.com / 123321ilup');
