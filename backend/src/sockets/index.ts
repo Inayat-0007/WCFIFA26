@@ -14,7 +14,12 @@ interface SocketData {
 export function initializeSocket(httpServer: HttpServer): void {
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: [process.env.CLIENT_URL || 'http://localhost:3000', 'http://localhost:3000'],
+      origin: [
+        process.env.CLIENT_URL || 'http://localhost:3000',
+        'http://localhost:3000',
+        'https://wcfifa-26.vercel.app',
+        'https://wcfifa26.vercel.app',
+      ],
       methods: ['GET', 'POST'],
       credentials: true,
     },
