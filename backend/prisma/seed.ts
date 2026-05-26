@@ -74,7 +74,7 @@ const players: Array<{
   // Argentina
   { name: 'Lionel Messi', country: 'Argentina', countryCode: 'AR', position: 'FWD', price: 12.0 },
   { name: 'Julian Alvarez', country: 'Argentina', countryCode: 'AR', position: 'FWD', price: 9.5 },
-  { name: 'Angel Di Maria', country: 'Argentina', countryCode: 'AR', position: 'MID', price: 8.5 },
+  { name: 'Alejandro Garnacho', country: 'Argentina', countryCode: 'AR', position: 'MID', price: 8.5 },
   { name: 'Rodrigo De Paul', country: 'Argentina', countryCode: 'AR', position: 'MID', price: 8.0 },
   { name: 'Enzo Fernandez', country: 'Argentina', countryCode: 'AR', position: 'MID', price: 9.0 },
   { name: 'Emiliano Martinez', country: 'Argentina', countryCode: 'AR', position: 'GK', price: 8.5 },
@@ -138,7 +138,7 @@ const players: Array<{
   { name: 'Rafael Leao', country: 'Portugal', countryCode: 'PT', position: 'FWD', price: 9.5 },
   { name: 'Ruben Neves', country: 'Portugal', countryCode: 'PT', position: 'MID', price: 8.0 },
   { name: 'Diogo Costa', country: 'Portugal', countryCode: 'PT', position: 'GK', price: 8.0 },
-  { name: 'Pepe', country: 'Portugal', countryCode: 'PT', position: 'DEF', price: 7.0 },
+  { name: 'Antonio Silva', country: 'Portugal', countryCode: 'PT', position: 'DEF', price: 7.5 },
   { name: 'Ruben Dias', country: 'Portugal', countryCode: 'PT', position: 'DEF', price: 8.5 },
   { name: 'Joao Cancelo', country: 'Portugal', countryCode: 'PT', position: 'DEF', price: 8.0 },
   // Netherlands
@@ -156,8 +156,8 @@ const players: Array<{
   { name: 'Leandro Trossard', country: 'Belgium', countryCode: 'BE', position: 'MID', price: 8.5 },
   { name: 'Yannick Carrasco', country: 'Belgium', countryCode: 'BE', position: 'MID', price: 8.0 },
   { name: 'Koen Casteels', country: 'Belgium', countryCode: 'BE', position: 'GK', price: 7.5 },
-  { name: 'Jan Vertonghen', country: 'Belgium', countryCode: 'BE', position: 'DEF', price: 7.0 },
-  { name: 'Toby Alderweireld', country: 'Belgium', countryCode: 'BE', position: 'DEF', price: 7.0 },
+  { name: 'Zeno Debast', country: 'Belgium', countryCode: 'BE', position: 'DEF', price: 7.5 },
+  { name: 'Arthur Theate', country: 'Belgium', countryCode: 'BE', position: 'DEF', price: 7.0 },
   // Croatia
   { name: 'Luka Modric', country: 'Croatia', countryCode: 'HR', position: 'MID', price: 10.0 },
   { name: 'Ivan Perisic', country: 'Croatia', countryCode: 'HR', position: 'MID', price: 8.5 },
@@ -219,14 +219,14 @@ const players: Array<{
   // Uruguay
   { name: 'Darwin Nunez', country: 'Uruguay', countryCode: 'UY', position: 'FWD', price: 10.5 },
   { name: 'Federico Valverde', country: 'Uruguay', countryCode: 'UY', position: 'MID', price: 10.0 },
-  { name: 'Luis Suarez', country: 'Uruguay', countryCode: 'UY', position: 'FWD', price: 8.5 },
+  { name: 'Facundo Pellistri', country: 'Uruguay', countryCode: 'UY', position: 'FWD', price: 8.0 },
   { name: 'Sergio Rochet', country: 'Uruguay', countryCode: 'UY', position: 'GK', price: 7.0 },
   { name: 'Ronald Araujo', country: 'Uruguay', countryCode: 'UY', position: 'DEF', price: 8.5 },
   // Colombia
   { name: 'Luis Diaz', country: 'Colombia', countryCode: 'CO', position: 'FWD', price: 10.5 },
   { name: 'James Rodriguez', country: 'Colombia', countryCode: 'CO', position: 'MID', price: 9.0 },
-  { name: 'Radamel Falcao', country: 'Colombia', countryCode: 'CO', position: 'FWD', price: 7.5 },
-  { name: 'David Ospina', country: 'Colombia', countryCode: 'CO', position: 'GK', price: 7.0 },
+  { name: 'Jhon Duran', country: 'Colombia', countryCode: 'CO', position: 'FWD', price: 8.5 },
+  { name: 'Camilo Vargas', country: 'Colombia', countryCode: 'CO', position: 'GK', price: 7.0 },
   { name: 'Davinson Sanchez', country: 'Colombia', countryCode: 'CO', position: 'DEF', price: 7.5 },
   // Denmark
   { name: 'Christian Eriksen', country: 'Denmark', countryCode: 'DK', position: 'MID', price: 9.5 },
@@ -235,9 +235,9 @@ const players: Array<{
   { name: 'Kasper Schmeichel', country: 'Denmark', countryCode: 'DK', position: 'GK', price: 8.0 },
   { name: 'Simon Kjaer', country: 'Denmark', countryCode: 'DK', position: 'DEF', price: 7.5 },
   // Switzerland
-  { name: 'Xherdan Shaqiri', country: 'Switzerland', countryCode: 'CH', position: 'FWD', price: 8.5 },
+  { name: 'Breel Embolo', country: 'Switzerland', countryCode: 'CH', position: 'FWD', price: 8.5 },
   { name: 'Granit Xhaka', country: 'Switzerland', countryCode: 'CH', position: 'MID', price: 8.5 },
-  { name: 'Yann Sommer', country: 'Switzerland', countryCode: 'CH', position: 'GK', price: 8.0 },
+  { name: 'Gregor Kobel', country: 'Switzerland', countryCode: 'CH', position: 'GK', price: 8.0 },
   { name: 'Nico Elvedi', country: 'Switzerland', countryCode: 'CH', position: 'DEF', price: 7.0 },
   { name: 'Manuel Akanji', country: 'Switzerland', countryCode: 'CH', position: 'DEF', price: 8.0 },
   // Iran
@@ -253,11 +253,11 @@ const players: Array<{
   { name: 'Ugurcan Cakir', country: 'Turkey', countryCode: 'TR', position: 'GK', price: 7.0 },
   { name: 'Merih Demiral', country: 'Turkey', countryCode: 'TR', position: 'DEF', price: 7.5 },
   // Ivory Coast
-  { name: 'Didier Drogba Jr', country: 'Ivory Coast', countryCode: 'CI', position: 'FWD', price: 7.5 },
+  { name: 'Sebastien Haller', country: 'Ivory Coast', countryCode: 'CI', position: 'FWD', price: 8.5 },
   { name: 'Franck Kessie', country: 'Ivory Coast', countryCode: 'CI', position: 'MID', price: 8.5 },
-  { name: 'Nicolas Pepe', country: 'Ivory Coast', countryCode: 'CI', position: 'FWD', price: 8.0 },
-  { name: 'Badra Ali Sangare', country: 'Ivory Coast', countryCode: 'CI', position: 'GK', price: 6.5 },
-  { name: 'Eric Bailly', country: 'Ivory Coast', countryCode: 'CI', position: 'DEF', price: 7.5 },
+  { name: 'Simon Adingra', country: 'Ivory Coast', countryCode: 'CI', position: 'FWD', price: 8.0 },
+  { name: 'Yahia Fofana', country: 'Ivory Coast', countryCode: 'CI', position: 'GK', price: 7.0 },
+  { name: 'Odilon Kossounou', country: 'Ivory Coast', countryCode: 'CI', position: 'DEF', price: 7.5 },
   // Ghana
   { name: 'Mohammed Kudus', country: 'Ghana', countryCode: 'GH', position: 'MID', price: 9.0 },
   { name: 'Jordan Ayew', country: 'Ghana', countryCode: 'GH', position: 'FWD', price: 8.0 },
@@ -288,14 +288,34 @@ const players: Array<{
   { name: 'Predrag Rajkovic', country: 'Serbia', countryCode: 'RS', position: 'GK', price: 7.0 },
   { name: 'Nikola Milenkovic', country: 'Serbia', countryCode: 'RS', position: 'DEF', price: 7.5 },
   // Wales
-  { name: 'Gareth Bale', country: 'Wales', countryCode: 'GB-WLS', position: 'FWD', price: 9.0 },
-  { name: 'Aaron Ramsey', country: 'Wales', countryCode: 'GB-WLS', position: 'MID', price: 8.0 },
+  { name: 'Brennan Johnson', country: 'Wales', countryCode: 'GB-WLS', position: 'FWD', price: 9.0 },
+  { name: 'Aaron Ramsey', country: 'Wales', countryCode: 'GB-WLS', position: 'MID', price: 7.5 },
   { name: 'Daniel James', country: 'Wales', countryCode: 'GB-WLS', position: 'FWD', price: 7.5 },
-  { name: 'Wayne Hennessey', country: 'Wales', countryCode: 'GB-WLS', position: 'GK', price: 7.0 },
+  { name: 'Danny Ward', country: 'Wales', countryCode: 'GB-WLS', position: 'GK', price: 7.0 },
   { name: 'Chris Mepham', country: 'Wales', countryCode: 'GB-WLS', position: 'DEF', price: 6.5 },
 ];
 
-// Group Stage matches for WC 2026 (48 matches)
+// Real FIFA World Cup 2026 Venues (16 stadiums across USA, Mexico, Canada)
+const wc2026Venues = [
+  { venue: 'MetLife Stadium', city: 'East Rutherford, NJ' },
+  { venue: 'SoFi Stadium', city: 'Inglewood, CA' },
+  { venue: 'AT&T Stadium', city: 'Arlington, TX' },
+  { venue: 'Hard Rock Stadium', city: 'Miami Gardens, FL' },
+  { venue: 'Mercedes-Benz Stadium', city: 'Atlanta, GA' },
+  { venue: 'NRG Stadium', city: 'Houston, TX' },
+  { venue: 'Lincoln Financial Field', city: 'Philadelphia, PA' },
+  { venue: 'Lumen Field', city: 'Seattle, WA' },
+  { venue: 'Gillette Stadium', city: 'Foxborough, MA' },
+  { venue: 'Arrowhead Stadium', city: 'Kansas City, MO' },
+  { venue: 'Levi\'s Stadium', city: 'Santa Clara, CA' },
+  { venue: 'Estadio Azteca', city: 'Mexico City, Mexico' },
+  { venue: 'Estadio BBVA', city: 'Monterrey, Mexico' },
+  { venue: 'Estadio Akron', city: 'Guadalajara, Mexico' },
+  { venue: 'BMO Field', city: 'Toronto, ON' },
+  { venue: 'BC Place', city: 'Vancouver, BC' },
+];
+
+// Group Stage matches for WC 2026
 const groupMatches = [
   // Group A
   { home: 'United States', away: 'Mexico', group: 'A', daysOffset: 0 },
@@ -407,7 +427,24 @@ const knockoutMatches = [
   // Third Place Play-off
   { home: 'Portugal', away: 'Croatia', round: 'Third-place play-off', daysOffset: 29, venue: 'Hard Rock Stadium', city: 'Miami Gardens, FL' },
   // Final
-  { home: 'Argentina', away: 'France', round: 'Final', daysOffset: 30, venue: 'MetLife Stadium', city: 'East Rutherford, NJ' }
+  { home: 'Argentina', away: 'France', round: 'Final', daysOffset: 30, venue: 'MetLife Stadium', city: 'East Rutherford, NJ' },
+  // Additional Round of 32 matches
+  { home: 'United States', away: 'Chile', round: 'Round of 32', daysOffset: 15, venue: 'NRG Stadium', city: 'Houston, TX' },
+  { home: 'England', away: 'Senegal', round: 'Round of 32', daysOffset: 16, venue: 'Lumen Field', city: 'Seattle, WA' },
+  { home: 'Uruguay', away: 'Nigeria', round: 'Round of 32', daysOffset: 16, venue: 'Lincoln Financial Field', city: 'Philadelphia, PA' },
+  { home: 'Brazil', away: 'Peru', round: 'Round of 32', daysOffset: 17, venue: 'Estadio Azteca', city: 'Mexico City, Mexico' },
+  { home: 'Colombia', away: 'Algeria', round: 'Round of 32', daysOffset: 17, venue: 'Estadio BBVA', city: 'Monterrey, Mexico' },
+  { home: 'Poland', away: 'Saudi Arabia', round: 'Round of 32', daysOffset: 18, venue: 'Levi\'s Stadium', city: 'Santa Clara, CA' },
+  { home: 'Turkey', away: 'Ecuador', round: 'Round of 32', daysOffset: 18, venue: 'Estadio Akron', city: 'Guadalajara, Mexico' },
+  { home: 'Iran', away: 'Tunisia', round: 'Round of 32', daysOffset: 19, venue: 'BMO Field', city: 'Toronto, ON' },
+  // Additional Round of 16 matches
+  { home: 'United States', away: 'England', round: 'Round of 16', daysOffset: 21, venue: 'MetLife Stadium', city: 'East Rutherford, NJ' },
+  { home: 'Brazil', away: 'Colombia', round: 'Round of 16', daysOffset: 22, venue: 'Estadio Azteca', city: 'Mexico City, Mexico' },
+  { home: 'Uruguay', away: 'Turkey', round: 'Round of 16', daysOffset: 22, venue: 'Hard Rock Stadium', city: 'Miami Gardens, FL' },
+  { home: 'Poland', away: 'Iran', round: 'Round of 16', daysOffset: 22, venue: 'AT&T Stadium', city: 'Arlington, TX' },
+  // Additional Quarter-finals
+  { home: 'United States', away: 'Brazil', round: 'Quarter-finals', daysOffset: 24, venue: 'AT&T Stadium', city: 'Arlington, TX' },
+  { home: 'Uruguay', away: 'Poland', round: 'Quarter-finals', daysOffset: 25, venue: 'NRG Stadium', city: 'Houston, TX' },
 ];
 
 
@@ -623,6 +660,7 @@ async function main() {
     const kickoff = new Date(startDate);
     kickoff.setDate(startDate.getDate() + m.daysOffset);
     const id = `match-${m.home.toLowerCase().replace(/\s+/g, '-')}-vs-${m.away.toLowerCase().replace(/\s+/g, '-')}`;
+    const venueData = wc2026Venues[matchCount % wc2026Venues.length];
     await prisma.match.upsert({
       where: { id },
       update: {},
@@ -634,8 +672,8 @@ async function main() {
         round: 'Group Stage',
         kickoffTime: kickoff,
         status: 'UPCOMING',
-        venue: 'MetLife Stadium',
-        city: 'East Rutherford, NJ',
+        venue: venueData.venue,
+        city: venueData.city,
       },
     });
     matchCount++;
@@ -721,9 +759,9 @@ async function main() {
   console.log('✅ User achievements & past histories seeded');
   console.log('🎉 Database seeding complete!');
   console.log('');
-  console.log('📧 Custom login: pragatid0902@gmail.com / 123321ilup');
-  console.log('📧 Admin login: admin@worldcupfantasy.com / Admin@2026!');
-  console.log('📧 Demo login:  demo@worldcupfantasy.com / Demo@2026!');
+  console.log('📧 Custom login: pragatid0902@gmail.com (password set in seed)');
+  console.log('📧 Admin login: admin@worldcupfantasy.com (password set in seed)');
+  console.log('📧 Demo login:  demo@worldcupfantasy.com (password set in seed)');
 }
 
 main()

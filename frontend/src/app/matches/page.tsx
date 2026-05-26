@@ -57,7 +57,7 @@ export default function MatchesPage() {
           if (roundFilter) params.append('round', roundFilter);
         }
         
-        params.append('limit', '104');
+        params.append('limit', '200');
         const res = await api.get(`/matches?${params}`);
         setMatches(res.data.data || []);
       } catch { } finally { setLoading(false); }
@@ -88,7 +88,7 @@ export default function MatchesPage() {
                 <span className="gradient-text">FIFA WC 2026</span>
                 <span className="text-white"> Matches</span>
               </h1>
-              <p className="text-gray-500 text-sm">All 104 matches of FIFA World Cup 2026</p>
+              <p className="text-gray-500 text-sm">All {matches.length} matches of FIFA World Cup 2026</p>
             </div>
 
             {/* View Switcher Toggle */}

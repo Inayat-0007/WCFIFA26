@@ -147,6 +147,37 @@ export interface Notification {
   createdAt: string;
 }
 
+// ─── Push Subscription Types ──────────────────────────────────────────────────
+export interface PushSubscription {
+  id: string;
+  userId: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  createdAt: string;
+}
+
+// ─── Achievement Types ────────────────────────────────────────────────────────
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  pointsAwarded: number;
+  isUnlocked: boolean;
+  unlockedAt: string | null;
+}
+
+// ─── Season History Types ─────────────────────────────────────────────────────
+export interface SeasonHistory {
+  id: string;
+  userId: string;
+  season: string;
+  rank: number;
+  totalPoints: number;
+  percentile: number | null;
+}
+
 // ─── API Response Types ───────────────────────────────────────────────────────
 export interface ApiResponse<T> {
   success: boolean;

@@ -90,3 +90,18 @@ export const validateUpdatePlayer = [
     .withMessage('Name must be 2-100 characters'),
   validate,
 ];
+
+// ─── Push Subscription Validators ─────────────────────────────────────────────
+export const validateSubscription = [
+  body('endpoint')
+    .notEmpty()
+    .isURL()
+    .withMessage('A valid push endpoint URL is required'),
+  body('keys.p256dh')
+    .notEmpty()
+    .withMessage('p256dh key is required'),
+  body('keys.auth')
+    .notEmpty()
+    .withMessage('auth key is required'),
+  validate,
+];

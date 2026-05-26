@@ -48,7 +48,12 @@ export function setupPassport(): void {
   );
 
   // ─── Google OAuth Strategy ─────────────────────────────────────────────────
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  if (
+    process.env.GOOGLE_CLIENT_ID &&
+    process.env.GOOGLE_CLIENT_SECRET &&
+    !process.env.GOOGLE_CLIENT_ID.startsWith('your_') &&
+    !process.env.GOOGLE_CLIENT_SECRET.startsWith('your_')
+  ) {
     passport.use(
       new GoogleStrategy(
         {

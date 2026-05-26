@@ -88,6 +88,7 @@ export const addMatchEvent = async (req: Request, res: Response, next: NextFunct
           ...(type === 'YELLOW_CARD' && { yellowCards: { increment: 1 } }),
           ...(type === 'RED_CARD' && { redCards: { increment: 1 } }),
           ...(type === 'PENALTY_MISS' && { penaltyMisses: { increment: 1 } }),
+          ...(type === 'CLEAN_SHEET' && { cleanSheet: true }),
         },
         create: {
           matchId,
@@ -97,6 +98,7 @@ export const addMatchEvent = async (req: Request, res: Response, next: NextFunct
           yellowCards: type === 'YELLOW_CARD' ? 1 : 0,
           redCards: type === 'RED_CARD' ? 1 : 0,
           penaltyMisses: type === 'PENALTY_MISS' ? 1 : 0,
+          cleanSheet: type === 'CLEAN_SHEET',
         },
       });
 

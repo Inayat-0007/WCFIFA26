@@ -3,32 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Edit2, LogOut, Trophy, Users, Zap, Bell, Award, Calendar, RefreshCw } from 'lucide-react';
+import { Edit2, LogOut, Trophy, Bell, Award, Calendar } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Navbar } from '@/components/ui/Navbar';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import type { Achievement, SeasonHistory } from '@/types';
 
 const AVATARS = ['⚽', '🏆', '🥅', '⭐', '🦁', '🐉', '🦅', '🔥', '💫', '🎯'];
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  pointsAwarded: number;
-  isUnlocked: boolean;
-  unlockedAt: string | null;
-}
-
-interface SeasonHistory {
-  id: string;
-  season: string;
-  rank: number;
-  totalPoints: number;
-  percentile: number;
-}
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);

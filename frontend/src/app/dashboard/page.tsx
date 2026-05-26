@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ChevronRight, Plus, Trophy, Star, ShieldAlert } from 'lucide-react';
+import { ChevronRight, Plus, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import { Navbar } from '@/components/ui/Navbar';
@@ -12,7 +12,7 @@ import { MatchCard } from '@/components/matches/MatchCard';
 import api from '@/lib/api';
 import type { Match, League, LeaderboardEntry } from '@/types';
 import { getRankMedal } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+
 
 const playDashboardSound = () => {
   if (typeof window === 'undefined') return;

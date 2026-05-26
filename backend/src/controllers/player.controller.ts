@@ -1,6 +1,5 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 type Position = 'GK' | 'DEF' | 'MID' | 'FWD';
 
 

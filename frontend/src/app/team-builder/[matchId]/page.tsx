@@ -88,7 +88,7 @@ const getPlayerStats = (player: Player) => {
   }
   const form = 6.0 + (Math.abs(hash % 38) / 10);
   const selectedBy = 5 + (Math.abs(hash % 88));
-  return { form: form.toFixed(1), selectedBy: `${selectedBy}%` };
+  return { form: form.toFixed(1), selectedBy: `${selectedBy}%`, isProjected: true };
 };
 
 export default function TeamBuilderPage() {
@@ -409,7 +409,7 @@ export default function TeamBuilderPage() {
             <span className="text-2xl">{getFlagByCountry(match?.homeTeam || '')}</span>
             <div className="text-left">
               <h2 className="font-bold text-sm leading-tight md:text-base">{match?.homeTeam} vs {match?.awayTeam}</h2>
-              <p className="text-xs text-gray-400">WC 2026 Group Stage</p>
+              <p className="text-xs text-gray-400">WC 2026 • {match?.round || 'Group Stage'}</p>
             </div>
             <span className="text-2xl">{getFlagByCountry(match?.awayTeam || '')}</span>
           </div>
@@ -675,7 +675,7 @@ export default function TeamBuilderPage() {
             <div className="flex items-center justify-between text-[10px] text-gray-500 font-extrabold uppercase px-2 mb-1.5">
               <span>Player Info</span>
               <div className="flex gap-4">
-                <span className="w-12 text-center">Form</span>
+                <span className="w-12 text-center">Est.</span>
                 <span className="w-12 text-center">Credits</span>
                 <span className="w-8"></span>
               </div>

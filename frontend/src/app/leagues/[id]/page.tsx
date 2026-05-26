@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Copy, Share2, UserMinus, Crown, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { Copy, Share2, UserMinus, Crown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import { Navbar } from '@/components/ui/Navbar';

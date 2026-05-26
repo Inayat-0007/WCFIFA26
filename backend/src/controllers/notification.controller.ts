@@ -8,7 +8,7 @@ const setupWebPush = () => {
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   const mailTo = process.env.VAPID_MAILTO || 'mailto:admin@worldcupfantasy.com';
 
-  if (publicKey && privateKey) {
+  if (publicKey && privateKey && !publicKey.startsWith('your_') && !privateKey.startsWith('your_')) {
     webpush.setVapidDetails(mailTo, publicKey, privateKey);
     return true;
   }
@@ -17,7 +17,7 @@ const setupWebPush = () => {
 
 export const getVapidPublicKey = async (req: Request, res: Response): Promise<void> => {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
-  if (!publicKey) {
+  if (!publicKey || publicKey.startsWith('your_')) {
     res.status(404).json({ success: false, message: 'VAPID public key not configured' });
     return;
   }
