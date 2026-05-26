@@ -10,16 +10,16 @@ const getApiUrl = () => {
   return 'http://localhost:4000/api';
 };
 
-const API_URL = getApiUrl();
-
 const api = axios.create({
-  baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });
 
 // Request interceptor — attach JWT token
 api.interceptors.request.use((config) => {
+  // Dynamically resolve the API URL in the browser at runtime
+  config.baseURL = getApiUrl();
+
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('wcf_token');
     if (token) {
