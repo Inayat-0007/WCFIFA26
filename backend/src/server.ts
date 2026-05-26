@@ -34,6 +34,8 @@ app.use(
       process.env.CLIENT_URL || 'http://localhost:3000',
       'http://localhost:3000',
       'http://localhost:3001',
+      'https://wcfifa-26.vercel.app',
+      'https://wcfifa26.vercel.app',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
