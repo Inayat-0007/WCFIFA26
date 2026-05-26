@@ -87,7 +87,7 @@ cron.schedule('* * * * *', async () => {
 
 // ─── START SERVER ─────────────────────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || '4000', 10);
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`
   ⚽ World Cup Fantasy 2026 API
   ================================
