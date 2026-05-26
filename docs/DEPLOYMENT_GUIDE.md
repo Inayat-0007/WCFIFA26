@@ -6,16 +6,16 @@
 
 ---
 
-## 📋 What You're Setting Up
+## 📋 What You're Setting Up (Current Status)
 
-| Step | Service | What It Does | Cost | Time |
-|------|---------|-------------|------|------|
-| 1 | **Neon** (neon.tech) | PostgreSQL database in the cloud | Free | 5 min |
-| 2 | **football-data.org** | Live match scores API key | Free | 3 min |
-| 3 | **VAPID Keys** | Push notification encryption keys | Free | 1 min |
-| 4 | **Render.com** | Hosts your backend (Express + Socket.IO + Cron) 24/7 | Free | 10 min |
-| 5 | **Vercel** | Hosts your frontend (Next.js) on global CDN | Free | 5 min |
-| 6 | **GitHub Push** | Push final code & trigger auto-deploy | Free | 5 min |
+| Step | Service | What It Does | Cost | Status |
+|------|---------|-------------|------|--------|
+| 1 | **Neon** (neon.tech) | PostgreSQL database in the cloud | Free | ✅ **Completed** |
+| 2 | **football-data.org** | Live match scores API key | Free | ✅ **Completed** |
+| 3 | **VAPID Keys** | Push notification encryption keys | Free | ✅ **Completed** |
+| 4 | **Render.com** | Hosts backend live at `https://wcfifa26.onrender.com` | Free | ✅ **Completed & Live** |
+| 5 | **Vercel** | Hosts your frontend (Next.js) on global CDN | Free | ⏳ **Next Step** |
+| 6 | **GitHub Push** | Push final code & trigger auto-deploy | Free | ✅ **Completed** |
 
 ---
 
