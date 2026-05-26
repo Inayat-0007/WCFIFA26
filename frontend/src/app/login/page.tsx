@@ -43,7 +43,11 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    if (!apiUrl && typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+      apiUrl = 'https://wcfifa26.onrender.com/api';
+    }
+    apiUrl = apiUrl ? apiUrl.replace('/api', '') : 'http://localhost:4000';
     window.location.href = `${apiUrl}/api/auth/google`;
   };
 
