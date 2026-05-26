@@ -130,7 +130,7 @@ Private Key:
 
 | Field | Value |
 |-------|-------|
-| **Name** | `wcfifa26-api` |
+| **Name** | `WCFIFA26` |
 | **Region** | Pick closest to you |
 | **Branch** | `main` |
 | **Root Directory** | `backend` |
@@ -164,8 +164,8 @@ Before clicking "Create", scroll down to **"Environment Variables"** and add eac
 
 1. Click **"Create Web Service"**
 2. Render will build your project — wait 2-3 minutes
-3. Once deployed, you'll get a URL like: `https://wcfifa26-api.onrender.com`
-4. Test it by visiting: `https://wcfifa26-api.onrender.com/health`
+3. Once deployed, you'll get a URL like: `https://wcfifa26.onrender.com`
+4. Test it by visiting: `https://wcfifa26.onrender.com/health`
    - You should see: `{"status":"ok","service":"World Cup Fantasy 2026 API",...}`
 
 5. **Copy your Render URL** — you need it for Step 5
@@ -174,7 +174,7 @@ Before clicking "Create", scroll down to **"Environment Variables"** and add eac
 
 After your backend is deployed and running, you need to initialize the database. In Render Dashboard:
 
-1. Go to your **wcfifa26-api** service
+1. Go to your **WCFIFA26** service
 2. Click the **"Shell"** tab (top-right area)
 3. Run these commands one by one:
 
@@ -226,25 +226,25 @@ Expand **"Environment Variables"** and add:
 
 | Key | Value |
 |-----|-------|
-| `NEXT_PUBLIC_API_URL` | `https://wcfifa26-api.onrender.com/api` |
+| `NEXT_PUBLIC_API_URL` | `https://wcfifa26.onrender.com/api` |
 
-> Replace `wcfifa26-api.onrender.com` with your actual Render URL from Step 4.4.
+> Replace `wcfifa26.onrender.com` with your actual Render URL from Step 4.4.
 
 ### 5.4 — Deploy
 
 1. Click **"Deploy"**
 2. Wait 1-2 minutes for the build
-3. You'll get a URL like: `https://wcfifa26.vercel.app`
+3. You'll get a URL like: `https://wcfifa-26.vercel.app`
 4. **This is the URL you share with your 10 friends!** 🎉
 
 ### 5.5 — Update Render's CLIENT_URL
 
 Now go back to **Render Dashboard**:
 
-1. Go to your `wcfifa26-api` service → **"Environment"** tab
+1. Go to your `WCFIFA26` service → **"Environment"** tab
 2. Update these two variables:
-   - `CLIENT_URL` = `https://wcfifa26.vercel.app`
-   - `API_URL` = `https://wcfifa26-api.onrender.com`
+   - `CLIENT_URL` = `https://wcfifa-26.vercel.app`
+   - `API_URL` = `https://wcfifa26.onrender.com`
 3. Click **"Save Changes"** → choose **"Save and deploy"**
 
 > This ensures CORS allows your Vercel frontend to talk to the Render backend.
@@ -284,7 +284,7 @@ git push
 
 ### 6.1 — Backend Health Check
 
-Visit: `https://wcfifa26-api.onrender.com/health`
+Visit: `https://wcfifa26.onrender.com/health`
 
 Expected response:
 ```json
@@ -297,7 +297,7 @@ Expected response:
 
 ### 6.2 — Frontend Load
 
-Visit: `https://wcfifa26.vercel.app`
+Visit: `https://wcfifa-26.vercel.app`
 
 You should see the landing page with the World Cup theme.
 
@@ -308,9 +308,9 @@ You should see the landing page with the World Cup theme.
 3. You should land on the dashboard with match data
 
 ### 6.4 — Invite Your Friends
-
 Share the Vercel URL with your friends. They can:
-1. Go to `https://wcfifa26.vercel.app/signup`
+
+1. Go to `https://wcfifa-26.vercel.app/signup`
 2. Create an account
 3. Start building fantasy teams for upcoming matches!
 
@@ -387,7 +387,7 @@ Once everything is deployed, send your friends this message:
 
 > **🏆 World Cup Fantasy 2026 is LIVE!**
 >
-> 1. Open: `https://wcfifa26.vercel.app`
+> 1. Open: `https://wcfifa-26.vercel.app`
 > 2. Click **Sign Up** → create your account
 > 3. Go to **Matches** → pick an upcoming match
 > 4. Build your **11-player team** (100 credits budget)
