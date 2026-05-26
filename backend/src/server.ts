@@ -53,6 +53,10 @@ setupPassport();
 app.use(passport.initialize());
 
 // ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
+app.get('/', (_req, res) => {
+  res.send('⚽ World Cup Fantasy 2026 API is running. Go to /health for status.');
+});
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'World Cup Fantasy 2026 API', timestamp: new Date().toISOString() });
 });
