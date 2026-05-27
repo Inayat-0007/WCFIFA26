@@ -1,12 +1,20 @@
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+const getSocketUrl = () => {
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+    return process.env.NEXT_PUBLIC_SOCKET_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://wcfifa26.onrender.com';
+  }
+  return 'http://localhost:4000';
+};
 
 let socket: Socket | null = null;
 
 export function getSocket(token?: string | null): Socket {
   if (!socket) {
-    socket = io(SOCKET_URL, {
+    socket = io(getSocketUrl(), {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,
