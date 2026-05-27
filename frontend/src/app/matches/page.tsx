@@ -78,38 +78,44 @@ export default function MatchesPage() {
   const groups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      {/* Stadium Light Rays */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+
       <Navbar />
-      <main className="px-4 pt-4 pb-24 md:pb-8 md:px-6 max-w-6xl mx-auto">
+      <main className="px-4 pt-6 pb-24 md:pb-8 md:px-6 max-w-6xl mx-auto relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-black mb-1">
+              <h1 className="text-3xl font-black tracking-tight mb-1">
                 <span className="gradient-text">FIFA WC 2026</span>
-                <span className="text-white"> Matches</span>
+                <span style={{ color: 'var(--text)' }}> Matches</span>
               </h1>
-              <p className="text-gray-500 text-sm">All {matches.length} matches of FIFA World Cup 2026</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                All {matches.length} matches of FIFA World Cup 2026
+              </p>
             </div>
 
             {/* View Switcher Toggle */}
-            <div className="flex bg-white/[0.02] border border-white/5 p-1 rounded-2xl w-fit">
+            <div className="flex p-1 rounded-2xl w-fit border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-primary text-[#0B0B0C] shadow-md shadow-primary/20'
-                    : 'text-gray-400 hover:text-white'
-                }`}
+                className="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all duration-200"
+                style={{
+                  background: viewMode === 'list' ? 'linear-gradient(135deg, var(--primary), var(--primary-hover))' : 'transparent',
+                  color: viewMode === 'list' ? '#fff' : 'var(--text-muted)',
+                }}
               >
                 📋 List View
               </button>
               <button
                 onClick={() => setViewMode('bracket')}
-                className={`px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all ${
-                  viewMode === 'bracket'
-                    ? 'bg-primary text-[#0B0B0C] shadow-md shadow-primary/20'
-                    : 'text-gray-400 hover:text-white'
-                }`}
+                className="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all duration-200"
+                style={{
+                  background: viewMode === 'bracket' ? 'linear-gradient(135deg, var(--primary), var(--primary-hover))' : 'transparent',
+                  color: viewMode === 'bracket' ? '#fff' : 'var(--text-muted)',
+                }}
               >
                 🌳 Bracket View
               </button>
@@ -119,80 +125,91 @@ export default function MatchesPage() {
           {viewMode === 'list' ? (
             <>
               {/* Status and Round filters */}
-              <div className="flex flex-wrap gap-3 mb-4 items-center">
+              <div className="flex flex-wrap gap-4 mb-6 items-center">
                 {/* Status Filters */}
                 <div className="flex gap-1.5 flex-wrap">
-                  {FILTERS.map((f) => (
-                    <button
-                      key={f.value}
-                      onClick={() => setFilter(f.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                        filter === f.value
-                          ? 'text-white border-primary-500/50'
-                          : 'text-gray-400 glass hover:text-white'
-                      }`}
-                      style={filter === f.value ? { background: 'rgba(220,20,60,0.15)', border: '1px solid rgba(220,20,60,0.4)' } : {}}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+                  {FILTERS.map((f) => {
+                    const isActive = filter === f.value;
+                    return (
+                      <button
+                        key={f.value}
+                        onClick={() => setFilter(f.value)}
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 border"
+                        style={{
+                          background: isActive ? 'var(--accent-glow)' : 'var(--card-bg)',
+                          borderColor: isActive ? 'var(--accent)' : 'var(--border)',
+                          color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="h-6 w-[1px] bg-white/10 hidden md:block" />
+                <div className="h-6 w-[1px] hidden md:block" style={{ background: 'var(--border)' }} />
 
                 {/* Round Filters */}
                 <div className="flex gap-1.5 flex-wrap">
-                  {ROUNDS.map((r) => (
-                    <button
-                      key={r.value}
-                      onClick={() => {
-                        setRoundFilter(r.value);
-                        if (r.value !== 'Group Stage') {
-                          setGroup(''); // Clear group filter if selecting knockout rounds
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                        roundFilter === r.value
-                          ? 'text-[#FFD700] border-[#FFD700]/50 bg-[#FFD700]/10'
-                          : 'text-gray-400 glass hover:text-white'
-                      }`}
-                      style={roundFilter === r.value ? { border: '1px solid rgba(255,215,0,0.4)' } : {}}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
+                  {ROUNDS.map((r) => {
+                    const isActive = roundFilter === r.value;
+                    return (
+                      <button
+                        key={r.value}
+                        onClick={() => {
+                          setRoundFilter(r.value);
+                          if (r.value !== 'Group Stage') {
+                            setGroup(''); // Clear group filter if selecting knockout rounds
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 border"
+                        style={{
+                          background: isActive ? 'var(--gold-glow)' : 'var(--card-bg)',
+                          borderColor: isActive ? 'var(--gold)' : 'var(--border)',
+                          color: isActive ? 'var(--gold)' : 'var(--text-muted)',
+                        }}
+                      >
+                        {r.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Group Filter (Only visible if roundFilter is empty or Group Stage) */}
               {(roundFilter === '' || roundFilter === 'Group Stage') && (
-                <div className="flex gap-1.5 flex-wrap mb-6 bg-white/[0.01] border border-white/5 p-3 rounded-2xl">
+                <div className="flex gap-1.5 flex-wrap mb-8 border p-3.5 rounded-2xl" style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}>
                   <button
                     onClick={() => setGroup('')}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                      group === ''
-                        ? 'bg-primary-500/20 text-primary border border-primary/30'
-                        : 'text-gray-500 hover:text-gray-300 glass'
-                    }`}
+                    className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border"
+                    style={{
+                      background: group === '' ? 'var(--primary-glow)' : 'transparent',
+                      borderColor: group === '' ? 'var(--primary)' : 'var(--border)',
+                      color: group === '' ? 'var(--primary)' : 'var(--text-muted)',
+                    }}
                   >
                     All Groups
                   </button>
-                  {groups.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => {
-                        setGroup(g);
-                        setRoundFilter('Group Stage'); // Autoselect Group Stage
-                      }}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                        group === g
-                          ? 'bg-primary-500/20 text-primary border border-primary/30'
-                          : 'text-gray-500 hover:text-gray-300 glass'
-                      }`}
-                    >
-                      Group {g}
-                    </button>
-                  ))}
+                  {groups.map((g) => {
+                    const isActive = group === g;
+                    return (
+                      <button
+                        key={g}
+                        onClick={() => {
+                          setGroup(g);
+                          setRoundFilter('Group Stage'); // Autoselect Group Stage
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border"
+                        style={{
+                          background: isActive ? 'var(--primary-glow)' : 'transparent',
+                          borderColor: isActive ? 'var(--primary)' : 'var(--border)',
+                          color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                        }}
+                      >
+                        Group {g}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
@@ -200,22 +217,24 @@ export default function MatchesPage() {
               {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[...Array(6)].map((_, i) => (
-                    <div key={i} className="glass rounded-2xl h-36 shimmer" />
+                    <div key={i} className="card h-40 shimmer" />
                   ))}
                 </div>
               ) : matches.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-5xl mb-4">⚽</div>
-                  <p className="text-gray-400">No matches found for this filter.</p>
+                <div className="text-center py-20 card" style={{ background: 'var(--card-bg)' }}>
+                  <div className="text-5xl mb-4 animate-bounce">⚽</div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    No matches found matching these filters.
+                  </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {matches.map((m, i) => (
                     <motion.div
                       key={m.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.02 }}
+                      transition={{ delay: i * 0.015 }}
                     >
                       <MatchCard match={m} />
                     </motion.div>
@@ -228,8 +247,8 @@ export default function MatchesPage() {
             <div>
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
-                  <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-                  <p className="text-xs text-gray-400">Assembling tournament tree...</p>
+                  <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: 'var(--primary)' }} />
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Assembling tournament tree...</p>
                 </div>
               ) : (
                 <KnockoutBracket matches={matches} />

@@ -1,173 +1,208 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Trophy, Users, BarChart3, User, Shield, LogOut, Sun, Moon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Home, Calendar, Trophy, BarChart3, User,
+  Sun, Moon, LogOut, Menu, X, Zap
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
-const navItems = [
+const NAV_LINKS = [
   { href: '/dashboard', label: 'Home', icon: Home },
-  { href: '/matches', label: 'Matches', icon: Trophy },
-  { href: '/leagues', label: 'Leagues', icon: Users },
+  { href: '/matches', label: 'Matches', icon: Calendar },
+  { href: '/leagues', label: 'Leagues', icon: Trophy },
   { href: '/leaderboard', label: 'Rankings', icon: BarChart3 },
   { href: '/profile', label: 'Profile', icon: User },
 ];
-
-const playClickSound = () => {
-  if (typeof window === 'undefined') return;
-  try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(550, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(750, ctx.currentTime + 0.06);
-    gain.gain.setValueAtTime(0.03, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.06);
-  } catch (e) {
-    // blocked or unsupported
-  }
-};
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
-
-  const handleLinkClick = () => {
-    playClickSound();
-  };
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
-      {/* Desktop Top Navbar */}
-      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 h-20 items-center justify-between px-10 glass-premium border-b border-primary-500/10">
-        <Link href="/dashboard" onClick={handleLinkClick} className="flex items-center gap-3 group">
-          <span className="text-3xl transition-transform duration-300 group-hover:rotate-12">🏆</span>
-          <span className="font-display font-black text-2xl tracking-tight gradient-text-gold">
-            Golden Glory
-          </span>
-        </Link>
-
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + '/');
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={handleLinkClick}
-                className={cn(
-                  'relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300',
-                  active
-                    ? 'text-white bg-primary/10 border border-primary/25 shadow-[0_0_15px_rgba(230,182,25,0.08)]'
-                    : 'text-gray-400 hover:text-white hover:bg-white/[0.03]'
-                )}
-              >
-                <Icon className={cn('w-4 h-4 transition-transform duration-300', active && 'text-primary scale-110')} />
-                <span>{label}</span>
-                {active && (
-                  <motion.div
-                    layoutId="active-nav-indicator"
-                    className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-primary"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-          
-          {user?.isAdmin && (
-            <Link
-              href="/admin"
-              onClick={handleLinkClick}
-              className={cn(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300',
-                pathname === '/admin'
-                  ? 'text-primary bg-primary/10 border border-primary/25'
-                  : 'text-primary/75 hover:text-primary hover:bg-primary/5'
-              )}
-            >
-              <Shield className="w-4 h-4" />
-              <span>Admin</span>
+      <nav className="sticky top-0 z-50 border-b" style={{
+        background: 'var(--nav-bg)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderColor: 'var(--border)',
+      }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 rounded-xl gradient-emerald flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-extrabold tracking-tight hidden sm:block" style={{ color: 'var(--text)' }}>
+                WCF <span className="gradient-text">2026</span>
+              </span>
             </Link>
-          )}
-        </div>
 
-        {/* Profile Card & Logout */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => {
-              playClickSound();
-              toggleTheme();
-            }}
-            className="flex items-center justify-center p-2.5 rounded-xl bg-white/5 hover:bg-primary-500/10 border border-white/5 hover:border-primary-500/20 text-gray-400 hover:text-primary transition-all duration-300"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-primary" />
-            ) : (
-              <Moon className="w-4 h-4 text-primary" />
-            )}
-          </button>
+            {/* Desktop Nav Links */}
+            <div className="hidden md:flex items-center gap-1">
+              {NAV_LINKS.map((link) => {
+                const isActive = pathname === link.href || pathname?.startsWith(link.href + '/');
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="relative px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all duration-200"
+                    style={{
+                      color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                      background: isActive ? 'var(--primary-glow)' : 'transparent',
+                    }}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                        style={{ background: 'var(--primary)' }}
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
 
-          <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-xl bg-white/[0.02] border border-white/5">
-            <span className="text-xl select-none">{user?.avatar || '⚽'}</span>
-            <span className="text-sm font-bold text-gray-200">{user?.name}</span>
-          </div>
-          
-          <button
-            onClick={() => {
-              playClickSound();
-              logout();
-            }}
-            className="flex items-center justify-center p-2.5 rounded-xl bg-white/5 hover:bg-accent-500/20 border border-white/5 hover:border-accent-500/30 text-gray-400 hover:text-white transition-all duration-300 group"
-            title="Log Out"
-          >
-            <LogOut className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Bottom Navbar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe glass-premium border-t border-primary-500/10 shadow-[0_-8px_30px_rgba(0,0,0,0.6)]">
-        <div className="flex items-center justify-around py-3">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + '/');
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={handleLinkClick}
-                className={cn(
-                  'flex flex-col items-center gap-1.5 px-3 py-1 rounded-xl transition-all duration-300 relative',
-                  active ? 'text-primary' : 'text-gray-500 hover:text-gray-300'
-                )}
+            {/* Right side */}
+            <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                }}
+                aria-label="Toggle theme"
               >
-                <Icon className={cn('w-5 h-5 transition-transform duration-300', active && 'scale-110')} />
-                <span className="text-[10px] font-bold tracking-wide">{label}</span>
-                {active && (
-                  <span className="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-primary" />
-                )}
-              </Link>
-            );
-          })}
+                <motion.div
+                  key={theme}
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" style={{ color: '#F59E0B' }} />
+                  ) : (
+                    <Moon className="w-4 h-4" style={{ color: '#6366F1' }} />
+                  )}
+                </motion.div>
+              </button>
+
+              {/* User Avatar */}
+              {user && (
+                <div className="flex items-center gap-2">
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <span className="text-lg select-none">{user.avatar || '⚽'}</span>
+                    <span className="text-sm font-bold truncate max-w-[120px]" style={{ color: 'var(--text)' }}>
+                      {user.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+                    style={{
+                      background: 'rgba(220,20,60,0.08)',
+                      border: '1px solid rgba(220,20,60,0.15)',
+                      color: '#DC143C',
+                    }}
+                    aria-label="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              >
+                {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
         </div>
       </nav>
 
-      {/* Spacer for desktop nav */}
-      <div className="hidden md:block h-20" />
+      {/* Mobile Slide-out */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 w-72 z-50 p-6 flex flex-col gap-2 md:hidden"
+              style={{ background: 'var(--bg)', borderLeft: '1px solid var(--border)' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>Menu</span>
+                <button onClick={() => setMobileOpen(false)}>
+                  <X className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                </button>
+              </div>
+
+              {user && (
+                <div className="flex items-center gap-3 p-3 rounded-xl mb-4" style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                }}>
+                  <span className="text-2xl">{user.avatar || '⚽'}</span>
+                  <div>
+                    <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{user.name}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{user.totalPoints} pts</p>
+                  </div>
+                </div>
+              )}
+
+              {NAV_LINKS.map((link) => {
+                const isActive = pathname === link.href;
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                    style={{
+                      color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                      background: isActive ? 'var(--primary-glow)' : 'transparent',
+                    }}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

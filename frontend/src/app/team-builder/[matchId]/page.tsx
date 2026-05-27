@@ -134,7 +134,6 @@ export default function TeamBuilderPage() {
     }
   }, []);
 
-
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/login');
   }, [isAuthenticated, isLoading, router]);
@@ -294,7 +293,7 @@ export default function TeamBuilderPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
         <div className="text-5xl animate-bounce">⚽</div>
       </div>
     );
@@ -394,41 +393,41 @@ export default function TeamBuilderPage() {
     ? 'bg-gradient-to-r from-red-600 to-rose-500 shadow-[0_0_10px_rgba(220,38,38,0.5)]'
     : budgetLeft < 10 
       ? 'bg-gradient-to-r from-amber-500 to-red-500' 
-      : 'bg-gradient-to-r from-[#e6b619] to-amber-500 shadow-[0_0_10px_rgba(230,182,25,0.3)]';
+      : 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.3)]';
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] text-white">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors duration-350">
       <Navbar />
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 pt-4 pb-24">
         
         {/* Top Header stats bar */}
-        <div className="glass rounded-2xl p-4 border border-white/5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="glass rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{getFlagByCountry(match?.homeTeam || '')}</span>
             <div className="text-left">
               <h2 className="font-bold text-sm leading-tight md:text-base">{match?.homeTeam} vs {match?.awayTeam}</h2>
-              <p className="text-xs text-gray-400">WC 2026 • {match?.round || 'Group Stage'}</p>
+              <p className="text-xs text-[var(--text-muted)]">WC 2026 • {match?.round || 'Group Stage'}</p>
             </div>
             <span className="text-2xl">{getFlagByCountry(match?.awayTeam || '')}</span>
           </div>
 
           {/* Stats Badges */}
           <div className="flex flex-wrap items-center gap-3 md:gap-6">
-            <div className="text-center px-3 py-1 bg-white/5 rounded-xl border border-white/5">
-              <p className="text-[10px] text-gray-400">Players Selected</p>
-              <p className="text-sm font-black text-white">{selected.length}/11</p>
+            <div className="text-center px-3 py-1 bg-[var(--bg-subtle)] rounded-xl border border-[var(--border)]">
+              <p className="text-[10px] text-[var(--text-muted)]">Players Selected</p>
+              <p className="text-sm font-black text-[var(--text)]">{selected.length}/11</p>
             </div>
-            <div className="text-center px-3 py-1 bg-white/5 rounded-xl border border-white/5">
-              <p className="text-[10px] text-gray-400">Balance (H:A)</p>
-              <p className="text-sm font-black text-[#FFD700]">
+            <div className="text-center px-3 py-1 bg-[var(--bg-subtle)] rounded-xl border border-[var(--border)]">
+              <p className="text-[10px] text-[var(--text-muted)]">Balance (H:A)</p>
+              <p className="text-sm font-black text-[var(--primary)]">
                 {homeCount} : {awayCount}
               </p>
             </div>
-            <div className="text-center px-3 py-1 bg-white/5 rounded-xl border border-white/5">
-              <p className="text-[10px] text-gray-400">Credits Remaining</p>
-              <p className={cn('text-sm font-black transition-colors', budgetLeft < 0 ? 'text-red-500 animate-pulse' : 'text-[#FFD700]')}>
+            <div className="text-center px-3 py-1 bg-[var(--bg-subtle)] rounded-xl border border-[var(--border)]">
+              <p className="text-[10px] text-[var(--text-muted)]">Credits Remaining</p>
+              <p className={cn('text-sm font-black transition-colors', budgetLeft < 0 ? 'text-red-500 animate-pulse' : 'text-[var(--primary)]')}>
                 {budgetLeft.toFixed(1)} / 100
               </p>
             </div>
@@ -436,7 +435,7 @@ export default function TeamBuilderPage() {
         </div>
 
         {/* Live Budget progress bar */}
-        <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-6 border border-white/5">
+        <div className="w-full bg-[var(--bg-subtle)] h-2.5 rounded-full overflow-hidden mb-6 border border-[var(--border)]">
           <motion.div 
             className={cn('h-full rounded-full transition-all duration-300', budgetColor)} 
             style={{ width: `${Math.min(100, budgetPercent)}%` }}
@@ -451,9 +450,9 @@ export default function TeamBuilderPage() {
           <div className="lg:col-span-7 flex flex-col gap-4">
             
             {/* Formation switcher */}
-            <div className="flex items-center justify-between p-3 glass rounded-2xl border border-white/5">
-              <span className="text-xs font-semibold text-gray-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#FFD700]" /> Select Formation:
+            <div className="flex items-center justify-between p-3 glass rounded-2xl">
+              <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" /> Select Formation:
               </span>
               <div className="flex gap-1">
                 {(['4-4-2', '4-3-3', '3-5-2', '3-4-3', '5-3-2'] as Formation[]).map((f) => (
@@ -463,8 +462,8 @@ export default function TeamBuilderPage() {
                     className={cn(
                       'px-2.5 py-1 rounded-lg text-xs font-bold transition-all border',
                       formation === f 
-                        ? 'bg-primary/20 border-primary text-white font-bold' 
-                        : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10 hover:text-white'
+                        ? 'bg-primary/20 border-primary text-[var(--text)] font-bold' 
+                        : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]'
                     )}
                   >
                     {f}
@@ -475,7 +474,7 @@ export default function TeamBuilderPage() {
 
             {/* Pitch graphic container */}
             <div className="pitch-3d-container w-full">
-              <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl pitch-3d-board" style={{ minHeight: '520px' }}>
+              <div className="relative rounded-3xl overflow-hidden border border-[var(--border)] shadow-2xl pitch-3d-board" style={{ minHeight: '520px' }}>
               <div className="absolute inset-0 pitch-bg opacity-90" />
               
               {/* Glowing Red Vignette on Drag */}
@@ -499,15 +498,15 @@ export default function TeamBuilderPage() {
               </svg>
 
               {/* Autodetect / Active Formation Badge */}
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-black/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
-                <p className="text-[10px] font-black tracking-widest text-[#FFD700] uppercase">
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-[var(--bg-subtle)]/90 px-3 py-1 rounded-full border border-[var(--border)] backdrop-blur-md">
+                <p className="text-[10px] font-black tracking-widest text-[var(--primary)] uppercase">
                   {selected.length === 11 ? `Squad Formation: ${formation}` : `Building: ${selected.length} / 11 Players`}
                 </p>
               </div>
 
               {/* DRAG TO REMOVE DECAL */}
-              <div className="absolute bottom-3 left-3 text-[9px] text-gray-500 font-semibold uppercase flex items-center gap-1">
-                <Info className="w-3 h-3 text-[#DC143C]" /> Drag jersey off pitch to discard
+              <div className="absolute bottom-3 left-3 text-[9px] text-[var(--text-muted)] font-semibold uppercase flex items-center gap-1">
+                <Info className="w-3 h-3 text-[var(--accent)]" /> Drag jersey off pitch to discard
               </div>
 
               {/* Drag Trash Zone HUD */}
@@ -601,21 +600,21 @@ export default function TeamBuilderPage() {
               <button
                 onClick={() => { setSelected([]); setCaptainId(''); setVcId(''); playSound('remove'); }}
                 disabled={selected.length === 0}
-                className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-xs"
+                className="px-4 py-3 bg-[var(--bg-subtle)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-2xl font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed text-xs text-[var(--text-secondary)]"
               >
                 <RotateCcw className="w-4 h-4" /> Reset
               </button>
 
               <button
                 onClick={() => { setShowCoachAdvice(true); playSound('success'); }}
-                className="px-4 py-3 bg-gradient-to-r from-primary/10 to-amber-500/10 hover:from-primary/20 hover:to-amber-500/20 border border-primary/30 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all text-[#e6b619] shadow-[0_0_15px_rgba(230,182,25,0.05)] hover:shadow-[0_0_15px_rgba(230,182,25,0.15)] text-xs"
+                className="px-4 py-3 bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border border-primary/30 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all text-[var(--primary)] shadow-[0_0_15px_var(--primary-glow)] text-xs"
               >
-                <Brain className="w-4.5 h-4.5 text-[#e6b619] animate-pulse" /> AI Coach
+                <Brain className="w-4.5 h-4.5 text-[var(--primary)] animate-pulse" /> AI Coach
               </button>
 
               <button
                 onClick={() => { setFilter(''); setShowDrawer(true); }}
-                className="flex-1 lg:hidden py-3 rounded-2xl font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all text-center text-xs"
+                className="flex-1 lg:hidden py-3 rounded-2xl font-semibold bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text)] hover:bg-[var(--surface-hover)] transition-all text-center text-xs"
               >
                 + Browse Selection
               </button>
@@ -624,11 +623,11 @@ export default function TeamBuilderPage() {
                 onClick={openSaveCeremony}
                 disabled={selected.length !== 11 || budgetLeft < 0 || isLocked}
                 className={cn(
-                  'flex-1 py-3 rounded-2xl font-black tracking-wide text-white transition-all transform hover:scale-[1.01] hover:brightness-115 active:scale-[0.99] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-center text-xs'
+                  'flex-1 py-3 rounded-2xl font-black tracking-wide text-white transition-all transform hover:scale-[1.01] hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-center text-xs'
                 )}
                 style={{
-                  background: 'linear-gradient(135deg, #e6b619, #b45309)',
-                  boxShadow: selected.length === 11 && budgetLeft >= 0 ? '0 4px 20px rgba(230, 182, 25, 0.4)' : 'none',
+                  background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
+                  boxShadow: selected.length === 11 && budgetLeft >= 0 ? '0 4px 20px var(--primary-glow)' : 'none',
                 }}
               >
                 {isLocked ? 'Match Locked' : selected.length === 11 ? 'Save & Assign Captains 👑' : `Select ${11 - selected.length} more player(s)`}
@@ -637,9 +636,9 @@ export default function TeamBuilderPage() {
           </div>
 
           {/* RIGHT COLUMN: DESKTOP PLAYER LIST PANEL */}
-          <div className="hidden lg:flex lg:col-span-5 flex-col max-h-[660px] glass rounded-3xl border border-white/5 p-4 overflow-hidden">
-            <h3 className="font-extrabold text-base flex items-center gap-2 mb-3">
-              <Trophy className="w-4 h-4 text-[#FFD700]" /> Select Player Pool
+          <div className="hidden lg:flex lg:col-span-5 flex-col max-h-[660px] glass rounded-3xl p-4 overflow-hidden">
+            <h3 className="font-extrabold text-base flex items-center gap-2 mb-3 text-[var(--text)]">
+              <Trophy className="w-4 h-4 text-[var(--primary)]" /> Select Player Pool
             </h3>
             
             {/* Tab Filters */}
@@ -651,8 +650,8 @@ export default function TeamBuilderPage() {
                   className={cn(
                     'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap',
                     filter === pos 
-                      ? 'bg-primary/20 border-primary text-white' 
-                      : 'bg-white/5 border-transparent text-gray-400 hover:text-white'
+                      ? 'bg-primary/20 border-primary text-[var(--text)]' 
+                      : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]'
                   )}
                 >
                   {pos || 'All Positions'}
@@ -662,17 +661,17 @@ export default function TeamBuilderPage() {
 
             {/* Search Input */}
             <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search player or team name..."
-                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs placeholder-gray-500 focus:border-primary/50 transition-colors"
+                className="w-full pl-9 pr-4 py-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl text-xs placeholder-[var(--text-muted)] focus:border-primary/50 text-[var(--text)] transition-colors"
               />
             </div>
 
             {/* List Header */}
-            <div className="flex items-center justify-between text-[10px] text-gray-500 font-extrabold uppercase px-2 mb-1.5">
+            <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-extrabold uppercase px-2 mb-1.5">
               <span>Player Info</span>
               <div className="flex gap-4">
                 <span className="w-12 text-center">Est.</span>
@@ -684,7 +683,7 @@ export default function TeamBuilderPage() {
             {/* Scrollable list */}
             <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
               {filteredPlayers.length === 0 ? (
-                <div className="text-center py-12 text-gray-500 text-xs">No players match the search filters.</div>
+                <div className="text-center py-12 text-[var(--text-muted)] text-xs">No players match the search filters.</div>
               ) : (
                 filteredPlayers.map((player) => {
                   const isSelected = !!selected.find((s) => s.id === player.id);
@@ -694,10 +693,10 @@ export default function TeamBuilderPage() {
                     <motion.div
                       key={player.id}
                       className={cn(
-                        'spotlight-card-interactive flex items-center justify-between p-2.5 rounded-xl border transition-all hover:bg-white/5',
+                        'spotlight-card-interactive flex items-center justify-between p-2.5 rounded-xl border transition-all hover:bg-[var(--surface-hover)]',
                         isSelected 
-                          ? 'bg-primary/10 border-primary/30' 
-                          : 'bg-white/[0.02] border-white/5'
+                          ? 'bg-[var(--primary-glow)] border-primary/30 text-[var(--text)]' 
+                          : 'bg-[var(--card-bg)] border-[var(--border)] text-[var(--text)]'
                       )}
                       onMouseMove={handleMouseMove}
                       layoutId={`player-card-${player.id}`}
@@ -713,14 +712,14 @@ export default function TeamBuilderPage() {
                             <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
                               {player.position}
                             </span>
-                            <span className="text-[10px] text-gray-400">{player.country}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">{player.country}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <span className="text-xs font-semibold text-green-400 w-12 text-center">⭐ {stats.form}</span>
-                        <span className="text-xs font-black text-[#FFD700] w-12 text-center">{player.price}</span>
+                        <span className="text-xs font-semibold text-emerald-500 w-12 text-center">⭐ {stats.form}</span>
+                        <span className="text-xs font-black text-[var(--primary)] w-12 text-center">{player.price}</span>
                         <button
                           onClick={() => isSelected ? removePlayer(player.id) : addPlayer(player)}
                           disabled={!isSelected && (!canAfford || selected.length >= 11)}
@@ -730,7 +729,7 @@ export default function TeamBuilderPage() {
                               ? 'bg-accent/20 border-accent/50 text-accent hover:bg-accent/30'
                               : canAfford && selected.length < 11
                                 ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
-                                : 'bg-white/5 border-transparent text-gray-600 cursor-not-allowed'
+                                : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed'
                           )}
                         >
                           {isSelected ? '−' : '+'}
@@ -743,7 +742,7 @@ export default function TeamBuilderPage() {
             </div>
 
             {/* List footer */}
-            <div className="mt-3 pt-2.5 border-t border-white/5 text-center text-[10px] text-gray-500 flex justify-between items-center px-1">
+            <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-center text-[10px] text-[var(--text-muted)] flex justify-between items-center px-1">
               <span>FIFA Pool: {players.length} players available</span>
               <span>Need 1 GK, max 11 players</span>
             </div>
@@ -771,16 +770,16 @@ export default function TeamBuilderPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[75vh] flex flex-col rounded-t-3xl border-t border-white/10 lg:hidden"
-              style={{ background: '#0F0F15' }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-h-[75vh] flex flex-col rounded-t-3xl border-t border-[var(--border)] lg:hidden"
+              style={{ background: 'var(--bg-subtle)' }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/5">
+              <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
                 <div>
-                  <h3 className="font-black text-sm">Select Squad Member</h3>
-                  <p className="text-[10px] text-gray-400">Budget Remaining: {budgetLeft.toFixed(1)} credits</p>
+                  <h3 className="font-black text-sm text-[var(--text)]">Select Squad Member</h3>
+                  <p className="text-[10px] text-[var(--text-muted)]">Budget Remaining: {budgetLeft.toFixed(1)} credits</p>
                 </div>
-                <button onClick={() => setShowDrawer(false)} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10">
+                <button onClick={() => setShowDrawer(false)} className="p-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -794,8 +793,8 @@ export default function TeamBuilderPage() {
                     className={cn(
                       'px-3 py-1 rounded-xl text-xs font-bold border transition-all whitespace-nowrap',
                       filter === pos 
-                        ? 'bg-primary/20 border-primary text-white' 
-                        : 'bg-white/5 border-transparent text-gray-400 hover:text-white'
+                        ? 'bg-primary/20 border-primary text-[var(--text)]' 
+                        : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]'
                     )}
                   >
                     {pos || 'All'}
@@ -806,12 +805,12 @@ export default function TeamBuilderPage() {
               {/* Search */}
               <div className="px-4 pb-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search name or country..."
-                    className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs placeholder-gray-500"
+                    className="w-full pl-9 pr-4 py-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl text-xs placeholder-[var(--text-muted)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -828,8 +827,8 @@ export default function TeamBuilderPage() {
                       className={cn(
                         'spotlight-card-interactive flex items-center justify-between p-3 rounded-xl border transition-all',
                         isSelected 
-                          ? 'bg-primary/10 border-primary/30' 
-                          : 'bg-white/[0.02] border-white/5'
+                          ? 'bg-[var(--primary-glow)] border-primary/30 text-[var(--text)]' 
+                          : 'bg-[var(--card-bg)] border-[var(--border)] text-[var(--text)]'
                       )}
                       onMouseMove={handleMouseMove}
                     >
@@ -844,24 +843,24 @@ export default function TeamBuilderPage() {
                             <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
                               {player.position}
                             </span>
-                            <span className="text-[10px] text-gray-400">{player.country}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">{player.country}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-green-400 font-bold">⭐ {stats.form}</span>
-                        <span className="text-xs font-black text-[#FFD700]">{player.price}</span>
+                        <span className="text-[10px] text-emerald-500 font-bold">⭐ {stats.form}</span>
+                        <span className="text-xs font-black text-[var(--primary)]">{player.price}</span>
                         <button
                           onClick={() => isSelected ? removePlayer(player.id) : addPlayer(player)}
                           disabled={!isSelected && (!canAfford || selected.length >= 11)}
                           className={cn(
-                            'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold border',
+                            'w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold border transition-all',
                             isSelected
-                              ? 'bg-accent/20 border-accent/50 text-accent'
+                              ? 'bg-accent/20 border-accent/50 text-accent hover:bg-accent/30'
                               : canAfford && selected.length < 11
-                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                                : 'bg-white/5 border-transparent text-gray-600 cursor-not-allowed'
+                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30'
+                                : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed'
                           )}
                         >
                           {isSelected ? '−' : '+'}
@@ -894,18 +893,18 @@ export default function TeamBuilderPage() {
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              className="relative w-full max-w-xl glass border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col max-h-[85vh] z-50"
-              style={{ background: '#0F0F15' }}
+              className="relative w-full max-w-xl glass border border-[var(--border)] rounded-3xl p-6 overflow-hidden flex flex-col max-h-[85vh] z-50 text-[var(--text)]"
+              style={{ background: 'var(--bg-subtle)' }}
             >
-              {/* Gold light burst decoration */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-yellow-500/10 rounded-full blur-[60px] pointer-events-none" />
+              {/* Green light burst decoration */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-primary/10 rounded-full blur-[60px] pointer-events-none" />
 
               {/* Modal Header */}
               <div className="text-center mb-4 relative">
-                <Sparkles className="w-8 h-8 text-[#FFD700] mx-auto mb-2 animate-pulse" />
+                <Sparkles className="w-8 h-8 text-[var(--primary)] mx-auto mb-2 animate-pulse" />
                 <h3 className="text-lg font-black tracking-wide">Assign Captain & Vice-Captain</h3>
-                <p className="text-xs text-gray-400 mt-1">
-                  Captain earns <span className="text-[#FFD700] font-black">2x points</span>. Vice-Captain earns <span className="text-gray-300 font-black">1.5x points</span>.
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  Captain earns <span className="text-[var(--primary)] font-black">2x points</span>. Vice-Captain earns <span className="text-[var(--text-secondary)] font-black">1.5x points</span>.
                 </p>
               </div>
 
@@ -922,10 +921,10 @@ export default function TeamBuilderPage() {
                       className={cn(
                         'flex items-center justify-between p-3 rounded-2xl border transition-all',
                         isCap 
-                          ? 'bg-[#FFD700]/5 border-[#FFD700]/30' 
+                          ? 'bg-primary/10 border-primary/30 text-[var(--text)]' 
                           : isVc 
-                            ? 'bg-gray-300/5 border-gray-300/30' 
-                            : 'bg-white/[0.01] border-white/5 hover:bg-white/5'
+                            ? 'bg-blue-500/10 border-blue-500/30 text-[var(--text)]' 
+                            : 'bg-[var(--card-bg)] border-[var(--border)] hover:bg-[var(--surface-hover)] text-[var(--text)]'
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -950,8 +949,8 @@ export default function TeamBuilderPage() {
                           className={cn(
                             'w-10 h-10 rounded-full font-black text-xs border flex items-center justify-center transition-all',
                             isCap
-                              ? 'bg-[#FFD700] text-dark-900 border-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.4)]'
-                              : 'bg-white/5 border-white/10 text-gray-400 hover:border-[#FFD700]'
+                              ? 'bg-primary text-white border-primary shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                              : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-secondary)] hover:border-primary'
                           )}
                         >
                           C
@@ -966,8 +965,8 @@ export default function TeamBuilderPage() {
                           className={cn(
                             'w-10 h-10 rounded-full font-black text-xs border flex items-center justify-center transition-all',
                             isVc
-                              ? 'bg-gray-300 text-dark-900 border-gray-300 shadow-[0_0_10px_rgba(200,200,200,0.4)]'
-                              : 'bg-white/5 border-white/10 text-gray-400 hover:border-gray-300'
+                              ? 'bg-blue-500 text-white border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]'
+                              : 'bg-[var(--bg-subtle)] border-[var(--border)] text-[var(--text-secondary)] hover:border-blue-500'
                           )}
                         >
                           VC
@@ -979,20 +978,20 @@ export default function TeamBuilderPage() {
               </div>
 
               {/* Confirm Save CTA */}
-              <div className="mt-4 pt-3 border-t border-white/5 flex gap-3">
+              <div className="mt-4 pt-3 border-t border-[var(--border)] flex gap-3">
                 <button
                   onClick={() => setShowCeremonyModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 font-bold hover:bg-white/10 hover:text-white transition-all text-xs"
+                  className="flex-1 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)] font-bold hover:bg-[var(--surface-hover)] hover:text-[var(--text)] transition-all text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={submitTeam}
                   disabled={saving || !captainId || !vcId}
-                  className="flex-1 py-2.5 rounded-xl font-extrabold text-[#0B0B0C] transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 py-2.5 rounded-xl font-extrabold text-white transition-all text-xs flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
-                    background: 'linear-gradient(135deg, #e6b619, #b45309)',
-                    boxShadow: '0 4px 15px rgba(230, 182, 25, 0.3)',
+                    background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
+                    boxShadow: '0 4px 15px var(--primary-glow)',
                   }}
                 >
                   {saving ? 'Saving...' : 'Lock Squad & Save Team 🏆'}
@@ -1022,12 +1021,13 @@ export default function TeamBuilderPage() {
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              className="relative w-full max-w-xl glass border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col max-h-[85vh] z-50 bg-dark-900 text-white"
+              className="relative w-full max-w-xl glass border border-[var(--border)] rounded-3xl p-6 overflow-hidden flex flex-col max-h-[85vh] z-50 text-[var(--text)]"
+              style={{ background: 'var(--bg-subtle)' }}
             >
               {/* Close Button */}
               <button
                 onClick={() => setSelectedDetailPlayerId(null)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)] flex items-center justify-center transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1035,21 +1035,21 @@ export default function TeamBuilderPage() {
               {loadingDetail ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-                  <p className="text-xs text-gray-400">Loading player analytics...</p>
+                  <p className="text-xs text-[var(--text-muted)]">Loading player analytics...</p>
                 </div>
               ) : detailPlayer ? (
                 <>
                   {/* Header */}
-                  <div className="flex items-center gap-4 mb-5 pb-4 border-b border-white/5">
+                  <div className="flex items-center gap-4 mb-5 pb-4 border-b border-[var(--border)]">
                     <span className="text-4xl">{getFlagByCountry(detailPlayer.country)}</span>
                     <div className="text-left">
-                      <h3 className="text-xl font-black tracking-wide text-white">{detailPlayer.name}</h3>
+                      <h3 className="text-xl font-black tracking-wide text-[var(--text)]">{detailPlayer.name}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={cn('text-[10px] px-1.5 py-0.5 rounded font-bold border uppercase', getPositionColor(detailPlayer.position))}>
                           {detailPlayer.position}
                         </span>
-                        <span className="text-xs text-gray-400">{detailPlayer.country}</span>
-                        <span className="text-xs text-[#FFD700] font-black">💰 {detailPlayer.price} Cr</span>
+                        <span className="text-xs text-[var(--text-secondary)]">{detailPlayer.country}</span>
+                        <span className="text-xs text-[var(--primary)] font-black">💰 {detailPlayer.price} Cr</span>
                       </div>
                     </div>
                   </div>
@@ -1064,10 +1064,10 @@ export default function TeamBuilderPage() {
                       { label: 'Assists', value: detailPlayer.stats?.assists || 0, icon: '👟' },
                       { label: 'Clean Sheets', value: detailPlayer.stats?.cleanSheets || 0, icon: '🧤' },
                     ].map(({ label, value, icon }) => (
-                      <div key={label} className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 text-center">
+                      <div key={label} className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-3 text-center">
                         <div className="text-xl mb-1">{icon}</div>
-                        <p className="text-lg font-black text-white">{value}</p>
-                        <p className="text-[10px] text-gray-400">{label}</p>
+                        <p className="text-lg font-black text-[var(--text)]">{value}</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">{label}</p>
                       </div>
                     ))}
                   </div>
@@ -1082,7 +1082,7 @@ export default function TeamBuilderPage() {
                 </>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-gray-400">Failed to load player details.</p>
+                  <p className="text-sm text-[var(--text-muted)]">Failed to load player details.</p>
                 </div>
               )}
             </motion.div>
@@ -1093,12 +1093,12 @@ export default function TeamBuilderPage() {
       {/* Floating AI Coach Advice button */}
       <motion.button
         onClick={() => { setShowCoachAdvice(true); playSound('success'); }}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#e6b619] to-[#D4AF37] text-dark-900 font-extrabold rounded-full px-5 py-3.5 shadow-[0_0_20px_rgba(230,182,25,0.4)] flex items-center gap-2 border border-[#e6b619]/40 hover:scale-105 active:scale-95 transition-all group"
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-primary to-primary-hover text-white font-extrabold rounded-full px-5 py-3.5 shadow-[0_0_20px_var(--primary-glow)] flex items-center gap-2 border border-primary/40 hover:scale-105 active:scale-95 transition-all group"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 1 }}
       >
-        <Sparkles className="w-5 h-5 text-dark-900 animate-pulse group-hover:rotate-12 transition-transform" />
+        <Sparkles className="w-5 h-5 text-white animate-pulse group-hover:rotate-12 transition-transform" />
         <span className="font-display tracking-tight text-xs uppercase font-extrabold">AI Coach Advice</span>
       </motion.button>
 
@@ -1121,24 +1121,24 @@ export default function TeamBuilderPage() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed top-0 right-0 bottom-0 w-full md:w-[450px] z-50 glass-gold-premium p-6 overflow-y-auto border-l border-[#e6b619]/20 flex flex-col justify-between"
-              style={{ background: 'rgba(15, 15, 21, 0.98)' }}
+              className="fixed top-0 right-0 bottom-0 w-full md:w-[450px] z-50 glass p-6 overflow-y-auto border-l border-[var(--border)] flex flex-col justify-between"
+              style={{ background: 'var(--bg-subtle)' }}
             >
               <div>
                 {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+                <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#e6b619]/10 border border-[#e6b619]/30 flex items-center justify-center">
-                      <Sparkles className="w-5 h-5 text-[#e6b619]" />
+                    <div className="w-10 h-10 rounded-full bg-[var(--primary-glow)] border border-primary/30 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-[var(--primary)]" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-black tracking-wide font-display text-[#e6b619]">AI Coach Advisor</h3>
-                      <p className="text-[10px] text-gray-400 font-sans">2026 Smart Tactics Engine</p>
+                      <h3 className="text-lg font-black tracking-wide font-display text-[var(--primary)]">AI Coach Advisor</h3>
+                      <p className="text-[10px] text-[var(--text-muted)] font-sans">2026 Smart Tactics Engine</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => { setShowCoachAdvice(false); playSound('tick'); }} 
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-colors"
+                    className="p-2 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1147,29 +1147,29 @@ export default function TeamBuilderPage() {
                 {/* Advice content */}
                 <div className="space-y-6">
                   {/* Squad Form / Rating Metrics */}
-                  <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4">
-                    <h4 className="text-xs font-black uppercase text-gray-400 mb-3 tracking-wider flex items-center gap-2">
-                      <Trophy className="w-3.5 h-3.5 text-[#e6b619]" /> Squad Metrics
+                  <div className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-4">
+                    <h4 className="text-xs font-black uppercase text-[var(--text-muted)] mb-3 tracking-wider flex items-center gap-2">
+                      <Trophy className="w-3.5 h-3.5 text-[var(--primary)]" /> Squad Metrics
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <p className="text-[9px] text-gray-500 font-bold uppercase">Avg Form Rating</p>
-                        <p className="text-xl font-black text-green-400 mt-1">⭐ {avgForm}</p>
+                      <div className="bg-[var(--bg)] rounded-xl p-3 border border-[var(--border)] text-center">
+                        <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase">Avg Form Rating</p>
+                        <p className="text-xl font-black text-emerald-500 mt-1">⭐ {avgForm}</p>
                       </div>
-                      <div className="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <p className="text-[9px] text-gray-500 font-bold uppercase">Efficiency</p>
-                        <p className="text-xl font-black text-[#e6b619] mt-1">{efficiency}%</p>
+                      <div className="bg-[var(--bg)] rounded-xl p-3 border border-[var(--border)] text-center">
+                        <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase">Efficiency</p>
+                        <p className="text-xl font-black text-[var(--primary)] mt-1">{efficiency}%</p>
                       </div>
                     </div>
                     {/* Form Progress Bar */}
                     <div className="mt-4">
-                      <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                      <div className="flex justify-between text-[10px] text-[var(--text-muted)] mb-1">
                         <span>Tactical Balance</span>
                         <span>{balancePercent}%</span>
                       </div>
-                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
+                      <div className="w-full bg-[var(--bg)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
                         <div 
-                          className="h-full bg-gradient-to-r from-amber-500 to-[#e6b619] rounded-full" 
+                          className="h-full bg-gradient-to-r from-primary to-primary-hover" 
                           style={{ width: `${balancePercent}%` }}
                         />
                       </div>
@@ -1178,18 +1178,18 @@ export default function TeamBuilderPage() {
 
                   {/* Tactical Insights List */}
                   <div className="space-y-3">
-                    <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider flex items-center gap-2">
+                    <h4 className="text-xs font-black uppercase text-[var(--text-muted)] tracking-wider flex items-center gap-2">
                       <Info className="w-3.5 h-3.5 text-blue-400" /> Coach Insights
                     </h4>
                     
                     {insights.map((insight, idx) => (
                       <div 
                         key={idx}
-                        className="p-3.5 rounded-xl border bg-white/[0.01] border-white/5 flex items-start gap-2.5"
+                        className="p-3.5 rounded-xl border bg-[var(--card-bg)] border-[var(--border)] flex items-start gap-2.5"
                       >
                         <span className="text-sm mt-0.5">{insight.icon}</span>
-                        <div className="text-xs leading-relaxed text-gray-300">
-                          <span className="font-bold text-white block mb-0.5">{insight.title}</span>
+                        <div className="text-xs leading-relaxed text-[var(--text-secondary)]">
+                          <span className="font-bold text-[var(--text)] block mb-0.5">{insight.title}</span>
                           {insight.desc}
                         </div>
                       </div>
@@ -1199,8 +1199,8 @@ export default function TeamBuilderPage() {
                   {/* Recommended Affordable Additions */}
                   {recommendedPlayers.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-xs font-black uppercase text-gray-400 tracking-wider flex items-center gap-2">
-                        <Sparkles className="w-3.5 h-3.5 text-[#e6b619]" /> Suggested Picks
+                      <h4 className="text-xs font-black uppercase text-[var(--text-muted)] tracking-wider flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" /> Suggested Picks
                       </h4>
                       
                       <div className="space-y-2">
@@ -1209,50 +1209,50 @@ export default function TeamBuilderPage() {
                           return (
                             <div 
                               key={player.id}
-                              className="spotlight-card-interactive flex items-center justify-between p-3 rounded-xl border bg-black/30 border-white/5 hover:border-[#e6b619]/30 transition-all"
+                              className="spotlight-card-interactive flex items-center justify-between p-3 rounded-xl border bg-[var(--card-bg)] border-[var(--border)] hover:border-primary/30 transition-all"
                               onMouseMove={handleMouseMove}
                             >
                               <div className="flex items-center gap-2.5">
-                               <span className="text-2xl">{getFlagByCountry(player.country)}</span>
-                               <div>
-                                 <p className="font-bold text-xs text-white leading-tight">{player.name}</p>
-                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                   <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
-                                     {player.position}
-                                   </span>
-                                   <span className="text-[10px] text-gray-400">{player.country}</span>
-                                 </div>
-                               </div>
-                             </div>
+                                <span className="text-2xl">{getFlagByCountry(player.country)}</span>
+                                <div>
+                                  <p className="font-bold text-xs text-[var(--text)] leading-tight">{player.name}</p>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className={cn('text-[9px] px-1 rounded font-bold border uppercase', getPositionColor(player.position))}>
+                                      {player.position}
+                                    </span>
+                                    <span className="text-[10px] text-[var(--text-muted)]">{player.country}</span>
+                                  </div>
+                                </div>
+                              </div>
 
-                             <div className="flex items-center gap-3">
-                               <div className="text-right">
-                                 <p className="text-[10px] text-green-400 font-bold">⭐ {stats.form}</p>
-                                 <p className="text-xs font-black text-[#e6b619]">{player.price} Cr</p>
-                               </div>
-                               <button
-                                 onClick={() => { addPlayer(player); playSound('pop'); }}
-                                 disabled={selected.length >= 11 || !canAfford}
-                                 className="w-7 h-7 rounded-lg bg-[#e6b619]/20 hover:bg-[#e6b619]/30 border border-[#e6b619]/40 text-[#e6b619] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm font-bold transition-all"
-                               >
-                                 +
-                               </button>
-                             </div>
-                           </div>
-                         );
-                       })}
-                     </div>
-                   </div>
-                 )}
-               </div>
-             </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                  <p className="text-[10px] text-emerald-500 font-bold">⭐ {stats.form}</p>
+                                  <p className="text-xs font-black text-[var(--primary)]">{player.price} Cr</p>
+                                </div>
+                                <button
+                                  onClick={() => { addPlayer(player); playSound('pop'); }}
+                                  disabled={selected.length >= 11 || !canAfford}
+                                  className="w-7 h-7 rounded-lg bg-primary/20 hover:bg-primary/30 border border-primary/40 text-primary disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm font-bold transition-all"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-             {/* Footer Lock Indicator */}
-             <div className="mt-6 pt-4 border-t border-white/5 text-center">
-               <p className="text-[10px] text-gray-500 font-medium">
-                 AI coach updates automatically as you swap squad members.
-               </p>
-             </div>
+              {/* Footer Lock Indicator */}
+              <div className="mt-6 pt-4 border-t border-[var(--border)] text-center">
+                <p className="text-[10px] text-[var(--text-muted)] font-medium">
+                  AI coach updates automatically as you swap squad members.
+                </p>
+              </div>
             </motion.div>
           </>
         )}
@@ -1295,10 +1295,10 @@ function PitchRow({
   // Custom neon borders for different positions in empty slots
   const getSlotStyles = (pos: Position) => {
     const styles: Record<Position, string> = {
-      GK: 'border-amber-500/20 text-amber-500/40 hover:border-amber-500/60 hover:text-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-amber-500/[0.02]',
-      DEF: 'border-blue-500/20 text-blue-500/40 hover:border-blue-500/60 hover:text-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.25)] bg-blue-500/[0.02]',
-      MID: 'border-emerald-500/20 text-emerald-500/40 hover:border-emerald-500/60 hover:text-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.25)] bg-emerald-500/[0.02]',
-      FWD: 'border-rose-500/20 text-rose-500/40 hover:border-rose-500/60 hover:text-rose-400 hover:shadow-[0_0_15px_rgba(244,63,94,0.25)] bg-rose-500/[0.02]',
+      GK: 'border-amber-500/30 text-amber-500 hover:border-amber-500/80 hover:shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-amber-500/[0.05]',
+      DEF: 'border-blue-500/30 text-blue-500 hover:border-blue-500/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.25)] bg-blue-500/[0.05]',
+      MID: 'border-emerald-500/30 text-emerald-500 hover:border-emerald-500/80 hover:shadow-[0_0_15px_rgba(16,185,129,0.25)] bg-emerald-500/[0.05]',
+      FWD: 'border-rose-500/30 text-rose-500 hover:border-rose-500/80 hover:shadow-[0_0_15px_rgba(244,63,94,0.25)] bg-rose-500/[0.05]',
     };
     return styles[pos] || 'border-white/10 text-white/30';
   };
@@ -1371,14 +1371,14 @@ function PitchRow({
                   
                   {/* Captain Badge Indicator */}
                   {isCaptain && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center text-[9px] font-black text-black border border-black shadow z-20">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[9px] font-black text-white border border-white shadow z-20">
                       C
                     </div>
                   )}
 
                   {/* Vice-Captain Badge Indicator */}
                   {isVC && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-[9px] font-black text-black border border-black shadow z-20">
+                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[9px] font-black text-white border border-white shadow z-20">
                       VC
                     </div>
                   )}
@@ -1387,13 +1387,13 @@ function PitchRow({
                   <div className="relative cursor-pointer" onClick={() => onPlayerClick?.(player.id)}>
                     <svg className={cn(
                       "w-12 h-12 md:w-14 md:h-14 drop-shadow-md transition-transform group-hover:scale-110",
-                      isCaptain && "filter drop-shadow-[0_0_6px_rgba(255,215,0,0.6)]",
-                      isVC && "filter drop-shadow-[0_0_6px_rgba(200,200,200,0.5)]"
+                      isCaptain && "filter drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]",
+                      isVC && "filter drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]"
                     )} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path 
                         d="M 20 28 L 32 15 L 43 19 L 50 15 L 57 19 L 68 15 L 80 28 L 73 38 L 66 33 L 66 85 L 34 85 L 34 33 L 27 38 Z" 
                         fill={finalPrimary} 
-                        stroke={isCaptain ? '#FFD700' : isVC ? '#d1d5db' : '#ffffff'} 
+                        stroke={isCaptain ? '#10B981' : isVC ? '#3b82f6' : '#ffffff'} 
                         strokeWidth="4"
                         strokeLinejoin="round" 
                       />
@@ -1426,7 +1426,7 @@ function PitchRow({
                   <p className="text-[9px] md:text-[10px] text-white font-extrabold truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {player.name.split(' ').pop()}
                   </p>
-                  <p className="text-[8px] text-[#FFD700] font-bold mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                  <p className="text-[8px] text-[var(--primary)] font-bold mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {player.price} Cr
                   </p>
                 </div>

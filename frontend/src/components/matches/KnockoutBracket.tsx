@@ -42,20 +42,19 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
         key={match.id}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={cn(
-          'w-64 glass border rounded-2xl p-3.5 relative overflow-hidden transition-all duration-300',
-          isLive 
-            ? 'border-primary/40 shadow-[0_0_15px_rgba(220,20,60,0.15)] bg-primary/5' 
-            : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.03]'
-        )}
+        className="w-64 card p-3.5 relative overflow-hidden transition-all duration-300"
+        style={{
+          borderLeft: isLive ? '4px solid var(--accent)' : '1px solid var(--border)',
+          background: isLive ? 'var(--primary-glow)' : 'var(--card-bg)',
+        }}
       >
         {/* Match Header */}
-        <div className="flex justify-between items-center text-[9px] text-gray-500 font-bold tracking-wider mb-2 font-sans">
+        <div className="flex justify-between items-center text-[9px] font-bold tracking-wider mb-2 font-sans" style={{ color: 'var(--text-muted)' }}>
           <span>{match.round}</span>
           {isLive && (
-            <span className="text-accent animate-pulse font-black">● LIVE</span>
+            <span className="animate-pulse font-black text-[9px]" style={{ color: 'var(--accent)' }}>● LIVE</span>
           )}
-          {isCompleted && <span className="text-gray-400">FT</span>}
+          {isCompleted && <span>FT</span>}
         </div>
 
         {/* Teams & Scores */}
@@ -64,10 +63,10 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-xl select-none flex-shrink-0">{getFlagByCountry(match.homeTeam)}</span>
-              <span className="text-xs font-bold text-gray-200 truncate">{match.homeTeam}</span>
+              <span className="text-xs font-bold truncate" style={{ color: 'var(--text)' }}>{match.homeTeam}</span>
             </div>
             {(isLive || isCompleted) && (
-              <span className="text-xs font-black text-white">{match.homeScore}</span>
+              <span className="text-xs font-black" style={{ color: 'var(--text)' }}>{match.homeScore}</span>
             )}
           </div>
 
@@ -75,22 +74,23 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-xl select-none flex-shrink-0">{getFlagByCountry(match.awayTeam)}</span>
-              <span className="text-xs font-bold text-gray-200 truncate">{match.awayTeam}</span>
+              <span className="text-xs font-bold truncate" style={{ color: 'var(--text)' }}>{match.awayTeam}</span>
             </div>
             {(isLive || isCompleted) && (
-              <span className="text-xs font-black text-white">{match.awayScore}</span>
+              <span className="text-xs font-black" style={{ color: 'var(--text)' }}>{match.awayScore}</span>
             )}
           </div>
         </div>
 
         {/* Footer info/Action */}
-        <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[8px] text-gray-500 font-medium">
+        <div className="mt-3 pt-2.5 border-t flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <span className="text-[8px] font-medium" style={{ color: 'var(--text-muted)' }}>
             {formatMatchTime(match.kickoffTime)}
           </span>
           <Link
             href={`/team-builder/${match.id}`}
-            className="text-[9px] font-black tracking-widest text-[#FFD700] hover:text-white transition-all uppercase"
+            className="text-[9px] font-black tracking-widest transition-all uppercase hover:opacity-80"
+            style={{ color: 'var(--gold)' }}
           >
             {match.hasUserTeam ? 'Edit Squad ✏️' : 'Pick Squad 🏆'}
           </Link>
@@ -100,17 +100,17 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
   };
 
   return (
-    <div className="w-full overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-white/10">
+    <div className="w-full overflow-x-auto pb-6 scrollbar-thin">
       <div className="min-w-[1400px] flex items-center justify-between gap-8 py-4 px-2">
         {/* ROUND OF 32 */}
         <div className="flex flex-col gap-6">
-          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest text-gray-400 mb-2">
+          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest mb-2 animate-pulse" style={{ color: 'var(--text-secondary)' }}>
             Round of 32
           </h3>
           <div className="flex flex-col gap-5">
             {sortedR32.map((m) => renderBracketMatchCard(m))}
             {sortedR32.length === 0 && (
-              <div className="text-[10px] text-gray-500 italic py-6 text-center w-64">
+              <div className="text-[10px] italic py-6 text-center w-64" style={{ color: 'var(--text-muted)' }}>
                 Round of 32 not started
               </div>
             )}
@@ -119,13 +119,13 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
 
         {/* ROUND OF 16 */}
         <div className="flex flex-col gap-6">
-          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest text-gray-400 mb-2">
+          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
             Round of 16
           </h3>
           <div className="flex flex-col gap-16 justify-around h-full py-6">
             {sortedR16.map((m) => renderBracketMatchCard(m))}
             {sortedR16.length === 0 && (
-              <div className="text-[10px] text-gray-500 italic py-6 text-center w-64">
+              <div className="text-[10px] italic py-6 text-center w-64" style={{ color: 'var(--text-muted)' }}>
                 Round of 16 not started
               </div>
             )}
@@ -134,13 +134,13 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
 
         {/* QUARTER-FINALS */}
         <div className="flex flex-col gap-6">
-          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest text-gray-400 mb-2">
+          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
             Quarter-finals
           </h3>
           <div className="flex flex-col gap-36 justify-around h-full py-12">
             {sortedQF.map((m) => renderBracketMatchCard(m))}
             {sortedQF.length === 0 && (
-              <div className="text-[10px] text-gray-500 italic py-6 text-center w-64">
+              <div className="text-[10px] italic py-6 text-center w-64" style={{ color: 'var(--text-muted)' }}>
                 Quarter-finals not started
               </div>
             )}
@@ -149,13 +149,13 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
 
         {/* SEMI-FINALS */}
         <div className="flex flex-col gap-6">
-          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest text-gray-400 mb-2">
+          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
             Semi-finals
           </h3>
           <div className="flex flex-col gap-64 justify-around h-full py-20">
             {sortedSF.map((m) => renderBracketMatchCard(m))}
             {sortedSF.length === 0 && (
-              <div className="text-[10px] text-gray-500 italic py-6 text-center w-64">
+              <div className="text-[10px] italic py-6 text-center w-64" style={{ color: 'var(--text-muted)' }}>
                 Semi-finals not started
               </div>
             )}
@@ -164,17 +164,17 @@ export function KnockoutBracket({ matches }: KnockoutBracketProps) {
 
         {/* FINAL */}
         <div className="flex flex-col gap-6">
-          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest text-[#FFD700] mb-2 glow-text">
-            👑 Final
+          <h3 className="text-center font-display font-black text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--gold)' }}>
+            🏆 Final
           </h3>
           <div className="flex flex-col justify-center h-full py-32">
             {sortedFn.map((m) => (
-              <div key={m.id} className="relative p-1 bg-gradient-to-r from-[#e6b619] via-[#D4AF37] to-[#b45309] rounded-3xl shadow-[0_0_30px_rgba(230,182,25,0.25)]">
+              <div key={m.id} className="relative p-0.5 rounded-3xl" style={{ background: 'linear-gradient(135deg, var(--gold), #EAB308)', boxShadow: '0 0 30px var(--gold-glow)' }}>
                 {renderBracketMatchCard(m)}
               </div>
             ))}
             {sortedFn.length === 0 && (
-              <div className="text-[10px] text-gray-500 italic py-6 text-center w-64">
+              <div className="text-[10px] italic py-6 text-center w-64" style={{ color: 'var(--text-muted)' }}>
                 Final not started
               </div>
             )}

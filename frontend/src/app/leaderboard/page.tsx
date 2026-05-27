@@ -28,30 +28,40 @@ export default function LeaderboardPage() {
   const rest = rankings.slice(3);
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      {/* Stadium Light Rays */}
+      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none" />
+
       <Navbar />
-      <main className="px-4 pt-4 pb-24 md:pb-8 md:px-6 max-w-2xl mx-auto">
+      <main className="px-4 pt-6 pb-24 md:pb-8 md:px-6 max-w-2xl mx-auto relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl font-black mb-1">
+          <h1 className="text-3xl font-black tracking-tight mb-1">
             <span className="gradient-text">Global</span>
-            <span className="text-white"> Leaderboard</span>
+            <span style={{ color: 'var(--text)' }}> Leaderboard</span>
           </h1>
-          <p className="text-gray-500 text-sm mb-6">All players ranked by total fantasy points</p>
+          <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
+            All players ranked by total fantasy points
+          </p>
 
           {loading ? (
-            <div className="space-y-2">
-              {[...Array(8)].map((_, i) => <div key={i} className="glass rounded-2xl h-16 shimmer" />)}
+            <div className="space-y-3">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="card h-16 shimmer" />
+              ))}
             </div>
           ) : rankings.length === 0 ? (
-            <div className="text-center py-16 glass rounded-3xl">
-              <div className="text-5xl mb-4">🏆</div>
-              <p className="text-gray-400">No rankings yet — play a match!</p>
+            <div className="text-center py-20 card" style={{ background: 'var(--card-bg)' }}>
+              <div className="text-5xl mb-4 animate-bounce">🏆</div>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                No rankings yet — play a match!
+              </p>
             </div>
           ) : (
             <>
               {/* Top 3 Podium */}
               {top3.length > 0 && (
-                <div className="flex items-end justify-center gap-4 mb-8">
+                <div className="flex items-end justify-center gap-4 mb-10 pt-4">
                   {/* 2nd place */}
                   {top3[1] && (
                     <motion.div
@@ -60,11 +70,21 @@ export default function LeaderboardPage() {
                       transition={{ delay: 0.1 }}
                       className="flex flex-col items-center"
                     >
-                      <span className="text-3xl mb-2">{top3[1].avatar || '⚽'}</span>
-                      <p className="text-xs font-semibold text-gray-300 mb-1 max-w-[80px] text-center truncate">{top3[1].name}</p>
-                      <p className="text-sm font-black text-gray-300 mb-2">{top3[1].totalPoints}</p>
-                      <div className="w-20 h-16 rounded-t-2xl flex items-center justify-center text-2xl font-black text-gray-400"
-                        style={{ background: 'linear-gradient(180deg, rgba(192,192,192,0.15), rgba(192,192,192,0.05))', border: '1px solid rgba(192,192,192,0.2)' }}>
+                      <span className="text-3xl mb-2 hover:scale-110 transition-transform select-none">{top3[1].avatar || '⚽'}</span>
+                      <p className="text-xs font-bold mb-1 max-w-[80px] text-center truncate" style={{ color: 'var(--text-secondary)' }}>
+                        {top3[1].name}
+                      </p>
+                      <p className="text-sm font-black mb-2" style={{ color: 'var(--text)' }}>
+                        {top3[1].totalPoints}
+                      </p>
+                      <div
+                        className="w-20 h-16 rounded-t-2xl flex items-center justify-center text-2xl font-black border border-b-0"
+                        style={{
+                          background: 'linear-gradient(180deg, rgba(148,163,184,0.15), rgba(148,163,184,0.02))',
+                          borderColor: 'var(--border)',
+                          boxShadow: '0 -4px 12px rgba(148,163,184,0.05)',
+                        }}
+                      >
                         🥈
                       </div>
                     </motion.div>
@@ -75,12 +95,22 @@ export default function LeaderboardPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col items-center"
                   >
-                    <div className="w-6 h-6 text-gold-400 mb-1">👑</div>
-                    <span className="text-4xl mb-2">{top3[0].avatar || '⚽'}</span>
-                    <p className="text-xs font-bold text-white mb-1 max-w-[90px] text-center truncate">{top3[0].name}</p>
-                    <p className="text-lg font-black gradient-text-gold mb-2">{top3[0].totalPoints}</p>
-                    <div className="w-24 h-24 rounded-t-2xl flex items-center justify-center text-3xl"
-                      style={{ background: 'linear-gradient(180deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05))', border: '1px solid rgba(255,215,0,0.3)' }}>
+                    <div className="text-xl mb-1 animate-bounce">👑</div>
+                    <span className="text-4xl mb-2 hover:scale-110 transition-transform select-none">{top3[0].avatar || '⚽'}</span>
+                    <p className="text-xs font-black mb-1 max-w-[90px] text-center truncate" style={{ color: 'var(--text)' }}>
+                      {top3[0].name}
+                    </p>
+                    <p className="text-lg font-black gradient-text-gold mb-2">
+                      {top3[0].totalPoints}
+                    </p>
+                    <div
+                      className="w-24 h-24 rounded-t-2xl flex items-center justify-center text-3xl border border-b-0"
+                      style={{
+                        background: 'linear-gradient(180deg, var(--gold-glow), transparent)',
+                        borderColor: 'var(--gold)',
+                        boxShadow: '0 -4px 16px var(--gold-glow)',
+                      }}
+                    >
                       🥇
                     </div>
                   </motion.div>
@@ -92,11 +122,21 @@ export default function LeaderboardPage() {
                       transition={{ delay: 0.2 }}
                       className="flex flex-col items-center"
                     >
-                      <span className="text-3xl mb-2">{top3[2].avatar || '⚽'}</span>
-                      <p className="text-xs font-semibold text-gray-300 mb-1 max-w-[80px] text-center truncate">{top3[2].name}</p>
-                      <p className="text-sm font-black text-gray-500 mb-2">{top3[2].totalPoints}</p>
-                      <div className="w-20 h-12 rounded-t-2xl flex items-center justify-center text-2xl"
-                        style={{ background: 'linear-gradient(180deg, rgba(205,127,50,0.15), rgba(205,127,50,0.05))', border: '1px solid rgba(205,127,50,0.2)' }}>
+                      <span className="text-3xl mb-2 hover:scale-110 transition-transform select-none">{top3[2].avatar || '⚽'}</span>
+                      <p className="text-xs font-bold mb-1 max-w-[80px] text-center truncate" style={{ color: 'var(--text-secondary)' }}>
+                        {top3[2].name}
+                      </p>
+                      <p className="text-sm font-black mb-2" style={{ color: 'var(--text-muted)' }}>
+                        {top3[2].totalPoints}
+                      </p>
+                      <div
+                        className="w-20 h-12 rounded-t-2xl flex items-center justify-center text-2xl border border-b-0"
+                        style={{
+                          background: 'linear-gradient(180deg, rgba(205,127,50,0.15), rgba(205,127,50,0.02))',
+                          borderColor: 'rgba(205,127,50,0.2)',
+                          boxShadow: '0 -4px 12px rgba(205,127,50,0.05)',
+                        }}
+                      >
                         🥉
                       </div>
                     </motion.div>
@@ -105,7 +145,7 @@ export default function LeaderboardPage() {
               )}
 
               {/* Full Rankings Table */}
-              <div className="glass rounded-2xl overflow-hidden">
+              <div className="card overflow-hidden" style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}>
                 {rankings.map((entry, idx) => {
                   const isMe = entry.userId === user?.id;
                   return (
@@ -113,18 +153,31 @@ export default function LeaderboardPage() {
                       key={entry.userId || idx}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.02 }}
-                      className={`flex items-center gap-3 px-4 py-3.5 ${idx !== rankings.length - 1 ? 'border-b border-white/5' : ''} ${isMe ? 'bg-primary-500/5 border-l-2 border-l-primary-500' : ''}`}
+                      transition={{ delay: idx * 0.01 }}
+                      className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0"
+                      style={{
+                        borderColor: 'var(--border)',
+                        background: isMe ? 'var(--primary-glow)' : 'transparent',
+                        borderLeft: isMe ? '4px solid var(--primary)' : '1px solid transparent',
+                      }}
                     >
-                      <span className="w-8 text-center text-base">{getRankMedal(entry.rank)}</span>
-                      <span className="text-xl">{entry.avatar || '⚽'}</span>
-                      <div className="flex-1">
-                        <p className={`font-semibold text-sm ${isMe ? 'text-primary-300' : ''}`}>
-                          {entry.name} {isMe && <span className="text-[10px] text-gray-500">(you)</span>}
+                      <span className="w-8 text-center text-base font-bold">{getRankMedal(entry.rank)}</span>
+                      <span className="text-xl select-none">{entry.avatar || '⚽'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="font-bold text-sm truncate"
+                          style={{ color: isMe ? 'var(--primary)' : 'var(--text)' }}
+                        >
+                          {entry.name} {isMe && <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>(you)</span>}
                         </p>
-                        <p className="text-xs text-gray-600">{entry.matchesPlayed || 0} matches</p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          {entry.matchesPlayed || 0} matches played
+                        </p>
                       </div>
-                      <span className={`font-black text-base ${entry.rank <= 3 ? 'gradient-text-gold' : 'text-white'}`}>
+                      <span
+                        className="font-black text-base"
+                        style={{ color: entry.rank <= 3 ? 'var(--gold)' : 'var(--text)' }}
+                      >
                         {entry.totalPoints}
                       </span>
                     </motion.div>

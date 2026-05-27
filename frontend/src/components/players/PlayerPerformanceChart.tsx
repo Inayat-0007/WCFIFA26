@@ -81,10 +81,10 @@ export function PlayerPerformanceChart({ matchPlayers, playerCountry }: PlayerPe
   });
 
   // Theme colors
-  const strokeColor = theme === 'dark' ? '#e6b619' : '#b45309'; // Gold / Amber 700
+  const strokeColor = theme === 'dark' ? '#10B981' : '#059669'; // Emerald
   const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
   const labelColor = theme === 'dark' ? 'text-gray-400' : 'text-slate-500';
-  const tooltipBg = theme === 'dark' ? 'bg-dark-800 border-primary-500/30' : 'bg-white border-slate-200 shadow-md';
+  const tooltipBg = theme === 'dark' ? 'bg-[var(--bg-subtle)] border-primary-500/30' : 'bg-white border-slate-200 shadow-md';
   const tooltipText = theme === 'dark' ? 'text-white' : 'text-slate-900';
 
   return (
@@ -144,17 +144,17 @@ export function PlayerPerformanceChart({ matchPlayers, playerCountry }: PlayerPe
             {/* Gradient Definitions */}
             <defs>
               <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#e6b619" />
-                <stop offset="50%" stopColor="#D4AF37" />
-                <stop offset="100%" stopColor="#E63946" />
+                <stop offset="0%" stopColor="#10B981" />
+                <stop offset="50%" stopColor="#059669" />
+                <stop offset="100%" stopColor="#06B6D4" />
               </linearGradient>
               <linearGradient id="area-grad-dark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#e6b619" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#e6b619" stopOpacity="0" />
+                <stop offset="0%" stopColor="#10B981" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
               </linearGradient>
               <linearGradient id="area-grad-light" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#b45309" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#b45309" stopOpacity="0" />
+                <stop offset="0%" stopColor="#059669" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#059669" stopOpacity="0" />
               </linearGradient>
             </defs>
 

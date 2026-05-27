@@ -284,10 +284,11 @@ export default function LiveMatchPage() {
 
   if (loading || !match) {
     return (
-      <div className="min-h-screen bg-dark-900">
+      <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)' }}>
         <Navbar />
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="text-5xl animate-float">⚽</div>
+        <div className="flex flex-col items-center justify-center h-[60vh]">
+          <div className="text-5xl animate-float select-none">⚽</div>
+          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mt-4" style={{ borderColor: 'var(--primary)' }} />
         </div>
       </div>
     );
@@ -296,51 +297,69 @@ export default function LiveMatchPage() {
   const isLive = match.status === 'LIVE';
 
   return (
-    <div className="min-h-screen bg-dark-900 text-white">
+    <div className="min-h-screen relative overflow-hidden pb-12" style={{ background: 'var(--bg)' }}>
+      {/* Stadium Light Rays */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+
       <Navbar />
-      <main className="px-4 pt-4 pb-24 md:pb-8 md:px-6 max-w-4xl mx-auto">
+      <main className="px-4 pt-6 pb-24 md:pb-8 md:px-6 max-w-4xl mx-auto relative z-10">
         {/* Match Hero */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-3xl p-6 mb-6 relative overflow-hidden"
-          style={isLive ? { border: '1px solid rgba(220,20,60,0.4)' } : {}}
+          className="card p-6 mb-6 relative overflow-hidden"
+          style={{
+            background: 'var(--card-bg)',
+            borderColor: isLive ? 'var(--accent)' : 'var(--border)',
+            boxShadow: isLive ? '0 0 24px var(--accent-glow)' : 'var(--shadow-md)',
+          }}
         >
           {isLive && (
             <div className="flex items-center gap-2 mb-4 justify-center">
               <div className="relative">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary-500" />
-                <div className="absolute inset-0 rounded-full bg-primary-500 animate-ping" />
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--accent)' }} />
+                <div className="absolute inset-0 rounded-full animate-ping" style={{ background: 'var(--accent)' }} />
               </div>
-              <span className="text-sm font-bold text-primary-400 tracking-wider">LIVE {match.minute && `· ${match.minute}'`}</span>
+              <span className="text-sm font-bold tracking-wider" style={{ color: 'var(--accent)' }}>
+                LIVE {match.minute && `· ${match.minute}'`}
+              </span>
             </div>
           )}
           {match.status === 'COMPLETED' && (
             <div className="text-center mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold text-gray-400 bg-dark-600">FULL TIME</span>
+              <span className="px-3.5 py-1.5 rounded-full text-xs font-bold border" style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                FULL TIME
+              </span>
             </div>
           )}
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 flex flex-col items-center gap-2">
-              <span className="text-5xl md:text-6xl">{getFlagByCountry(match.homeTeam)}</span>
-              <span className="font-bold text-sm md:text-base text-center">{match.homeTeam}</span>
+              <span className="text-5xl md:text-6xl select-none">{getFlagByCountry(match.homeTeam)}</span>
+              <span className="font-bold text-sm md:text-base text-center" style={{ color: 'var(--text)' }}>
+                {match.homeTeam}
+              </span>
             </div>
             <div className="text-center">
               <div className="flex items-center gap-3">
-                <span className={`text-5xl md:text-6xl font-black ${isLive ? 'text-primary-400' : 'text-white'}`}>{match.homeScore}</span>
-                <span className="text-3xl text-gray-600 font-bold">:</span>
-                <span className={`text-5xl md:text-6xl font-black ${isLive ? 'text-primary-400' : 'text-white'}`}>{match.awayScore}</span>
+                <span className="text-5xl md:text-6xl font-black gradient-text">{match.homeScore}</span>
+                <span className="text-3xl font-bold" style={{ color: 'var(--text-muted)' }}>:</span>
+                <span className="text-5xl md:text-6xl font-black gradient-text">{match.awayScore}</span>
               </div>
             </div>
             <div className="flex-1 flex flex-col items-center gap-2">
-              <span className="text-5xl md:text-6xl">{getFlagByCountry(match.awayTeam)}</span>
-              <span className="font-bold text-sm md:text-base text-center">{match.awayTeam}</span>
+              <span className="text-5xl md:text-6xl select-none">{getFlagByCountry(match.awayTeam)}</span>
+              <span className="font-bold text-sm md:text-base text-center" style={{ color: 'var(--text)' }}>
+                {match.awayTeam}
+              </span>
             </div>
           </div>
 
           {match.venue && (
-            <p className="text-center text-xs text-gray-600 mt-4">📍 {match.venue}, {match.city}</p>
+            <p className="text-center text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
+              📍 {match.venue}, {match.city}
+            </p>
           )}
         </motion.div>
 
@@ -349,29 +368,30 @@ export default function LiveMatchPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="glass-gold rounded-2xl p-4 mb-6 flex items-center justify-between"
+            className="card p-4 mb-6 flex items-center justify-between border"
+            style={{ background: 'var(--gold-glow)', borderColor: 'var(--gold)' }}
           >
             <div>
-              <p className="text-xs text-gray-400 mb-0.5">My Fantasy Points</p>
+              <p className="text-xs mb-0.5" style={{ color: 'var(--text-muted)' }}>My Fantasy Points</p>
               <p className="text-3xl font-black gradient-text-gold">{myTeamPoints}</p>
             </div>
-            <div className="text-3xl">🏆</div>
+            <div className="text-3xl select-none">🏆</div>
           </motion.div>
         )}
 
         {/* Tab Switcher */}
-        <div className="flex gap-2 mb-6 p-1 bg-dark-800 rounded-2xl border border-white/5">
+        <div className="flex gap-2 mb-6 p-1 rounded-2xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <button
             onClick={() => {
               playSound('tick');
               setActiveTab('match');
             }}
-            className={cn(
-              "flex-1 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border",
-              activeTab === 'match'
-                ? "bg-[#DC143C]/20 text-white border-[#DC143C]/30 shadow-[0_0_10px_rgba(220,20,60,0.15)]"
-                : "border-transparent text-gray-400 hover:text-white"
-            )}
+            className="flex-1 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border duration-200"
+            style={{
+              background: activeTab === 'match' ? 'var(--primary-glow)' : 'transparent',
+              borderColor: activeTab === 'match' ? 'var(--primary)' : 'transparent',
+              color: activeTab === 'match' ? 'var(--primary)' : 'var(--text-muted)',
+            }}
           >
             Match Feed & Stats 📊
           </button>
@@ -380,12 +400,12 @@ export default function LiveMatchPage() {
               playSound('tick');
               setActiveTab('squad');
             }}
-            className={cn(
-              "flex-1 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border",
-              activeTab === 'squad'
-                ? "bg-[#DC143C]/20 text-white border-[#DC143C]/30 shadow-[0_0_10px_rgba(220,20,60,0.15)]"
-                : "border-transparent text-gray-400 hover:text-white"
-            )}
+            className="flex-1 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all border duration-200"
+            style={{
+              background: activeTab === 'squad' ? 'var(--primary-glow)' : 'transparent',
+              borderColor: activeTab === 'squad' ? 'var(--primary)' : 'transparent',
+              color: activeTab === 'squad' ? 'var(--primary)' : 'var(--text-muted)',
+            }}
           >
             My Fantasy Squad 🛡️
           </button>
@@ -399,15 +419,19 @@ export default function LiveMatchPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Match Timeline</h2>
-                <div className="glass rounded-2xl p-4 space-y-3 max-h-80 overflow-y-auto">
+                <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Match Timeline</h2>
+                <div className="card p-4 space-y-3 max-h-80 overflow-y-auto" style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}>
                   {[...match.events].sort((a, b) => b.minute - a.minute).map((event) => (
                     <div key={event.id} className="flex items-center gap-3">
-                      <span className="text-xl">{getEventIcon(event.type)}</span>
-                      <span className="text-xs font-bold text-gray-500 w-8">{event.minute}&apos;</span>
-                      <div className="flex-1">
-                        <p className="text-sm text-white">{event.type.replace(/_/g, ' ')}</p>
-                        {event.detail && <p className="text-xs text-gray-500">{event.detail}</p>}
+                      <span className="text-xl select-none">{getEventIcon(event.type)}</span>
+                      <span className="text-xs font-bold w-8" style={{ color: 'var(--text-muted)' }}>{event.minute}&apos;</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
+                          {event.type.replace(/_/g, ' ')}
+                        </p>
+                        {event.detail && (
+                          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{event.detail}</p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -422,22 +446,27 @@ export default function LiveMatchPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Player Fantasy Points</h2>
-                <div className="glass rounded-2xl overflow-hidden">
+                <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Player Fantasy Points</h2>
+                <div className="card overflow-hidden" style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}>
                   {match.matchPlayers.slice(0, 20).map((mp, idx) => (
-                    <div key={mp.id} className={`flex items-center gap-3 px-4 py-3 ${idx !== match.matchPlayers!.length - 1 ? 'border-b border-white/5' : ''}`}>
-                      <span className="text-xs text-gray-600 w-4">{idx + 1}</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">{mp.player?.name}</p>
-                        <p className="text-xs text-gray-500">{mp.player?.country} · {mp.player?.position}</p>
+                    <div key={mp.id} className="flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0" style={{ borderColor: 'var(--border)' }}>
+                      <span className="text-xs w-4" style={{ color: 'var(--text-muted)' }}>{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate" style={{ color: 'var(--text)' }}>{mp.player?.name}</p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          {mp.player?.country} · {mp.player?.position}
+                        </p>
                       </div>
-                      <div className="flex gap-3 text-xs text-gray-500">
-                        {mp.goals > 0 && <span>⚽ {mp.goals}</span>}
-                        {mp.assists > 0 && <span>🎯 {mp.assists}</span>}
-                        {mp.yellowCards > 0 && <span>🟨 {mp.yellowCards}</span>}
-                        {mp.redCards > 0 && <span>🟥 {mp.redCards}</span>}
+                      <div className="flex gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {mp.goals > 0 && <span className="select-none">⚽ {mp.goals}</span>}
+                        {mp.assists > 0 && <span className="select-none">🎯 {mp.assists}</span>}
+                        {mp.yellowCards > 0 && <span className="select-none">🟨 {mp.yellowCards}</span>}
+                        {mp.redCards > 0 && <span className="select-none">🟥 {mp.redCards}</span>}
                       </div>
-                      <span className={`font-black text-sm ${mp.fantasyPoints > 0 ? 'text-[#FFD700]' : mp.fantasyPoints < 0 ? 'text-primary-400' : 'text-gray-500'}`}>
+                      <span
+                        className="font-black text-sm"
+                        style={{ color: mp.fantasyPoints > 0 ? 'var(--gold)' : mp.fantasyPoints < 0 ? 'var(--accent)' : 'var(--text-muted)' }}
+                      >
                         {mp.fantasyPoints > 0 ? '+' : ''}{mp.fantasyPoints}
                       </span>
                     </div>
@@ -455,7 +484,7 @@ export default function LiveMatchPage() {
                 className="space-y-6"
               >
                 {/* Miniature Pitch container */}
-                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl p-6 flex flex-col justify-between pitch-bg" style={{ minHeight: '560px' }}>
+                <div className="relative rounded-3xl overflow-hidden border shadow-2xl p-6 flex flex-col justify-between pitch-bg" style={{ minHeight: '560px', borderColor: 'var(--border)' }}>
                   {/* Pitch markings */}
                   <div className="absolute inset-0 opacity-35 pointer-events-none">
                     <svg className="w-full h-full" viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
@@ -470,7 +499,10 @@ export default function LiveMatchPage() {
                   </div>
 
                   {/* Header Badge */}
-                  <div className="relative z-10 self-center bg-black/60 px-4 py-1.5 rounded-full border border-white/10 backdrop-blur-md text-[10px] font-black text-[#FFD700] tracking-widest uppercase mb-4">
+                  <div
+                    className="relative z-10 self-center px-4 py-1.5 rounded-full border backdrop-blur-md text-[10px] font-black tracking-widest uppercase mb-4"
+                    style={{ background: 'var(--nav-bg)', borderColor: 'var(--border)', color: 'var(--gold)' }}
+                  >
                     FORMATION: {getFormation()}
                   </div>
 
@@ -514,7 +546,10 @@ export default function LiveMatchPage() {
                   </div>
 
                   {/* Floating Pitch Legend */}
-                  <div className="relative z-10 mt-6 bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl p-2.5 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[9px] text-gray-300 font-bold self-center shadow-lg max-w-md">
+                  <div
+                    className="relative z-10 mt-6 backdrop-blur-md rounded-2xl p-2.5 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[9px] font-bold self-center border shadow-lg max-w-md"
+                    style={{ background: 'var(--card-bg)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+                  >
                     <div className="flex items-center gap-1">
                       <span className="w-4 h-4 rounded-full bg-[#FFD700] text-black text-[9px] font-black border border-black flex items-center justify-center">C</span>
                       <span>Captain (2x Pts)</span>
@@ -524,19 +559,19 @@ export default function LiveMatchPage() {
                       <span>Vice-Captain (1.5x Pts)</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="w-4 h-4 flex items-center justify-center">⚽</span>
+                      <span className="w-4 h-4 flex items-center justify-center select-none">⚽</span>
                       <span>Goal</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="w-4 h-4 flex items-center justify-center">🎯</span>
+                      <span className="w-4 h-4 flex items-center justify-center select-none">🎯</span>
                       <span>Assist</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="w-4 h-4 flex items-center justify-center">🟨</span>
+                      <span className="w-4 h-4 flex items-center justify-center select-none">🟨</span>
                       <span>Yellow</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="w-4 h-4 flex items-center justify-center">🟥</span>
+                      <span className="w-4 h-4 flex items-center justify-center select-none">🟥</span>
                       <span>Red</span>
                     </div>
                   </div>
@@ -547,8 +582,11 @@ export default function LiveMatchPage() {
                   <div className="flex justify-center">
                     <Link
                       href={`/team-builder/${id}`}
-                      className="px-6 py-3 rounded-2xl font-black text-sm text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
-                      style={{ background: 'linear-gradient(135deg, #DC143C, #8B0000)' }}
+                      className="px-6 py-3 rounded-2xl font-black text-sm text-white transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                      style={{
+                        background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
+                        boxShadow: '0 4px 12px var(--primary-glow)',
+                      }}
                     >
                       <span>Edit Squad ✏️</span>
                     </Link>
@@ -556,17 +594,20 @@ export default function LiveMatchPage() {
                 )}
               </motion.div>
             ) : (
-              <div className="glass rounded-3xl p-8 text-center border border-white/5 flex flex-col items-center justify-center py-16">
-                <div className="text-5xl mb-4 animate-float">🛡️</div>
-                <h3 className="text-lg font-black text-white mb-2">No Fantasy Squad Created</h3>
-                <p className="text-sm text-gray-400 max-w-sm mb-6 leading-relaxed">
+              <div className="card p-8 text-center border flex flex-col items-center justify-center py-16" style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+                <div className="text-5xl mb-4 animate-float select-none">🛡️</div>
+                <h3 className="text-lg font-black mb-2" style={{ color: 'var(--text)' }}>No Fantasy Squad Created</h3>
+                <p className="text-sm max-w-sm mb-6 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                   You didn&apos;t create a fantasy roster for this match. Next time, be sure to pick your 11 players before kickoff!
                 </p>
                 {match.status === 'UPCOMING' && (
                   <Link
                     href={`/team-builder/${id}`}
-                    className="px-6 py-3 rounded-2xl font-black text-sm text-white shadow-lg transition-transform hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(135deg, #DC143C, #8B0000)' }}
+                    className="px-6 py-3 rounded-2xl font-black text-sm text-white transition-transform hover:scale-[1.02]"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
+                      boxShadow: '0 4px 12px var(--primary-glow)',
+                    }}
                   >
                     Build Your Squad Now 🚀
                   </Link>
@@ -585,7 +626,7 @@ export default function LiveMatchPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => {
                 playSound('remove');
                 setSelectedPlayerDetails(null);
@@ -595,8 +636,8 @@ export default function LiveMatchPage() {
               initial={{ scale: 0.95, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 20, opacity: 0 }}
-              className="relative w-full max-w-sm glass border border-white/10 rounded-3xl p-6 overflow-hidden z-50 shadow-[0_0_50px_rgba(255,215,0,0.1)]"
-              style={{ background: '#0F0F15' }}
+              className="relative w-full max-w-sm card p-6 overflow-hidden z-50 shadow-xl"
+              style={{ background: 'var(--card-bg)', borderColor: 'var(--border)', color: 'var(--text)' }}
             >
               {/* Close icon top-right */}
               <button 
@@ -604,31 +645,37 @@ export default function LiveMatchPage() {
                   playSound('remove');
                   setSelectedPlayerDetails(null);
                 }}
-                className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors text-xs font-bold border border-white/5"
+                className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-colors text-xs font-bold border hover:opacity-80"
+                style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-muted)' }}
               >
                 ✕
               </button>
 
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-16 bg-[#FFD700]/10 rounded-full blur-[30px] pointer-events-none" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-16 rounded-full blur-[30px] pointer-events-none" style={{ background: 'var(--primary-glow)' }} />
               
               <div className="text-center mb-5 mt-2">
-                <span className="text-5xl animate-float inline-block mb-1">{getFlagByCountry(selectedPlayerDetails.player.country)}</span>
-                <h3 className="text-xl font-black mt-2 text-white tracking-wide">{selectedPlayerDetails.player.name}</h3>
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400 mt-0.5">{selectedPlayerDetails.player.country} · {selectedPlayerDetails.player.position}</p>
+                <span className="text-5xl animate-float inline-block mb-1 select-none">{getFlagByCountry(selectedPlayerDetails.player.country)}</span>
+                <h3 className="text-xl font-black mt-2 tracking-wide" style={{ color: 'var(--text)' }}>{selectedPlayerDetails.player.name}</h3>
+                <p className="text-xs font-bold uppercase tracking-wider mt-0.5" style={{ color: 'var(--primary)' }}>
+                  {selectedPlayerDetails.player.country} · {selectedPlayerDetails.player.position}
+                </p>
               </div>
 
               {/* Price & Match Points Meters */}
-              <div className="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/5 mb-5">
+              <div className="space-y-3 p-4 rounded-2xl border mb-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
                 {/* Price Meter */}
                 <div>
                   <div className="flex justify-between text-[11px] mb-1.5">
-                    <span className="text-gray-400 font-semibold">Player Value</span>
-                    <span className="text-white font-black">${selectedPlayerDetails.player.price.toFixed(1)}M</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Player Value</span>
+                    <span className="font-black" style={{ color: 'var(--text)' }}>${selectedPlayerDetails.player.price.toFixed(1)}M</span>
                   </div>
-                  <div className="w-full h-2 bg-dark-800 rounded-full overflow-hidden border border-white/5">
+                  <div className="w-full h-2 rounded-full overflow-hidden border" style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}>
                     <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" 
-                      style={{ width: `${Math.min(100, (selectedPlayerDetails.player.price / 15.0) * 100)}%` }}
+                      className="h-full rounded-full" 
+                      style={{
+                        background: 'linear-gradient(90deg, var(--primary), var(--primary-hover))',
+                        width: `${Math.min(100, (selectedPlayerDetails.player.price / 15.0) * 100)}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -636,13 +683,14 @@ export default function LiveMatchPage() {
                 {/* Match Points Meter */}
                 <div>
                   <div className="flex justify-between text-[11px] mb-1.5">
-                    <span className="text-gray-400 font-semibold">Total Match Points</span>
-                    <span className="gradient-text-gold font-black">{getPlayerMatchPoints(selectedPlayerDetails).display}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Total Match Points</span>
+                    <span className="font-black" style={{ color: 'var(--gold)' }}>{getPlayerMatchPoints(selectedPlayerDetails).display}</span>
                   </div>
-                  <div className="w-full h-2 bg-dark-800 rounded-full overflow-hidden border border-white/5">
+                  <div className="w-full h-2 rounded-full overflow-hidden border" style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}>
                     <div 
-                      className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full" 
+                      className="h-full rounded-full" 
                       style={{ 
+                        background: 'linear-gradient(90deg, var(--gold), #EAB308)',
                         width: `${Math.max(5, Math.min(100, ((getPlayerMatchPoints(selectedPlayerDetails).total) / 25.0) * 100))}%` 
                       }}
                     />
@@ -652,49 +700,49 @@ export default function LiveMatchPage() {
 
               {/* Grid-based Statistics Table */}
               <div className="mb-6">
-                <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase mb-2">Live Match Stats Breakdown</p>
+                <p className="text-[10px] font-bold tracking-wider uppercase mb-2" style={{ color: 'var(--text-muted)' }}>Live Match Stats Breakdown</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-gray-400">Goals Scored</span>
-                      <span className="text-xs font-black text-white">{selectedPlayerDetails.player.matchPlayers?.[0]?.goals || 0}</span>
+                  <div className="border rounded-xl p-2.5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>Goals Scored</span>
+                      <span className="text-xs font-black" style={{ color: 'var(--text)' }}>{selectedPlayerDetails.player.matchPlayers?.[0]?.goals || 0}</span>
                     </div>
-                    <span className="text-lg">⚽</span>
+                    <span className="text-lg select-none">⚽</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-gray-400">Assists Made</span>
-                      <span className="text-xs font-black text-white">{selectedPlayerDetails.player.matchPlayers?.[0]?.assists || 0}</span>
+                  <div className="border rounded-xl p-2.5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>Assists Made</span>
+                      <span className="text-xs font-black" style={{ color: 'var(--text)' }}>{selectedPlayerDetails.player.matchPlayers?.[0]?.assists || 0}</span>
                     </div>
-                    <span className="text-lg">🎯</span>
+                    <span className="text-lg select-none">🎯</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-gray-400">Yellow Cards</span>
-                      <span className="text-xs font-black text-yellow-500">{selectedPlayerDetails.player.matchPlayers?.[0]?.yellowCards || 0}</span>
+                  <div className="border rounded-xl p-2.5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>Yellow Cards</span>
+                      <span className="text-xs font-black" style={{ color: 'var(--gold)' }}>{selectedPlayerDetails.player.matchPlayers?.[0]?.yellowCards || 0}</span>
                     </div>
-                    <span className="text-lg">🟨</span>
+                    <span className="text-lg select-none">🟨</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-gray-400">Red Cards</span>
-                      <span className="text-xs font-black text-red-500">{selectedPlayerDetails.player.matchPlayers?.[0]?.redCards || 0}</span>
+                  <div className="border rounded-xl p-2.5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>Red Cards</span>
+                      <span className="text-xs font-black" style={{ color: 'var(--accent)' }}>{selectedPlayerDetails.player.matchPlayers?.[0]?.redCards || 0}</span>
                     </div>
-                    <span className="text-lg">🟥</span>
+                    <span className="text-lg select-none">🟥</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-gray-400">Clean Sheet</span>
-                      <span className="text-xs font-black text-white">{selectedPlayerDetails.player.matchPlayers?.[0]?.cleanSheet ? 'Yes' : 'No'}</span>
+                  <div className="border rounded-xl p-2.5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>Clean Sheet</span>
+                      <span className="text-xs font-black" style={{ color: 'var(--text)' }}>{selectedPlayerDetails.player.matchPlayers?.[0]?.cleanSheet ? 'Yes' : 'No'}</span>
                     </div>
-                    <span className="text-lg">🛡️</span>
+                    <span className="text-lg select-none">🛡️</span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-semibold text-gray-400">Pen Misses</span>
-                      <span className="text-xs font-black text-white">{selectedPlayerDetails.player.matchPlayers?.[0]?.penaltyMisses || 0}</span>
+                  <div className="border rounded-xl p-2.5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>Pen Misses</span>
+                      <span className="text-xs font-black" style={{ color: 'var(--text)' }}>{selectedPlayerDetails.player.matchPlayers?.[0]?.penaltyMisses || 0}</span>
                     </div>
-                    <span className="text-lg">⚠️</span>
+                    <span className="text-lg select-none">⚠️</span>
                   </div>
                 </div>
               </div>
@@ -704,7 +752,8 @@ export default function LiveMatchPage() {
                   playSound('remove');
                   setSelectedPlayerDetails(null);
                 }}
-                className="w-full py-3 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 rounded-xl text-xs font-black text-white tracking-wider transition-all transform hover:scale-[1.02] shadow-md uppercase"
+                className="w-full py-3 rounded-xl text-xs font-black text-white tracking-wider transition-all shadow-md uppercase hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}
               >
                 Close Profile
               </button>
