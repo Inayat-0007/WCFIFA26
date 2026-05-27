@@ -21,6 +21,7 @@ import leaderboardRoutes from './routes/leaderboard.routes';
 import adminRoutes from './routes/admin.routes';
 import notificationRoutes from './routes/notification.routes';
 import userRoutes from './routes/user.routes';
+import neonAuthRoutes from './routes/neonAuth.routes';
 
 import { syncEventsForLiveMatches } from './services/footballApi.service';
 
@@ -83,6 +84,7 @@ app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth/neon', neonAuthRoutes);
 
 // ─── SOCKET.IO ─────────────────────────────────────────────────────────────────
 initializeSocket(httpServer);

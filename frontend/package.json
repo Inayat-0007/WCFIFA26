@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
+    "@neondatabase/neon-js": "^0.6.1-beta",
     "@tanstack/react-query": "^5.20.5",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",

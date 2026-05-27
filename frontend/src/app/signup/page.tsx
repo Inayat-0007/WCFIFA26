@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -163,6 +163,12 @@ export default function SignupPage() {
                 />
               </div>
               {errors.confirmPassword && <p className="mt-1.5 text-xs text-primary-400">{errors.confirmPassword.message}</p>}
+            </div>
+
+            {/* Neon Auth badge */}
+            <div className="flex items-center gap-2 text-xs text-gray-500 pt-1">
+              <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+              <span>Secured by Neon Auth with email verification</span>
             </div>
 
             <button

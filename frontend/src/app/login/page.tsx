@@ -19,7 +19,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,28 +35,27 @@ export default function LoginPage() {
       toast.success('Welcome back! 🏆');
       router.push('/dashboard');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Login failed. Please check your credentials.';
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string; code?: string };
+      let msg = 'Login failed. Please check your credentials.';
+      if (axiosErr.response?.data?.message) {
+        msg = axiosErr.response.data.message;
+      } else if (axiosErr.code === 'ERR_NETWORK' || axiosErr.code === 'ECONNREFUSED') {
+        msg = 'Cannot connect to server. Please try again in a moment.';
+      } else if (axiosErr.message) {
+        msg = axiosErr.message;
+      }
       toast.error(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    let apiUrl = '';
-    // Always use production URL when on Vercel
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname;
-      if (host.includes('vercel.app') || host.includes('wcfifa')) {
-        apiUrl = 'https://wcfifa26.onrender.com';
-      }
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+    } catch {
+      toast.error('Google login failed. Please try again.');
     }
-    if (!apiUrl) {
-      apiUrl = process.env.NEXT_PUBLIC_API_URL
-        ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '')
-        : 'http://localhost:4000';
-    }
-    window.location.href = `${apiUrl}/api/auth/google`;
   };
 
   return (
