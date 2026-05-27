@@ -43,11 +43,19 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    let apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    if (!apiUrl && typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-      apiUrl = 'https://wcfifa26.onrender.com/api';
+    let apiUrl = '';
+    // Always use production URL when on Vercel
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host.includes('vercel.app') || host.includes('wcfifa')) {
+        apiUrl = 'https://wcfifa26.onrender.com';
+      }
     }
-    apiUrl = apiUrl ? apiUrl.replace('/api', '') : 'http://localhost:4000';
+    if (!apiUrl) {
+      apiUrl = process.env.NEXT_PUBLIC_API_URL
+        ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '')
+        : 'http://localhost:4000';
+    }
     window.location.href = `${apiUrl}/api/auth/google`;
   };
 

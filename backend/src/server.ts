@@ -28,15 +28,25 @@ const app = express();
 const httpServer = createServer(app);
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://wcfifa-26.vercel.app',
+  'https://wcfifa26.vercel.app',
+];
+
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL || 'http://localhost:3000',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://wcfifa-26.vercel.app',
-      'https://wcfifa26.vercel.app',
-    ],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      // Allow any vercel.app subdomain (covers preview deployments)
+      if (origin.endsWith('.vercel.app')) return callback(null, true);
+      // Allow explicitly listed origins
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(null, false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

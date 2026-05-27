@@ -1,11 +1,19 @@
 import axios from 'axios';
 
-const getApiUrl = () => {
+const PRODUCTION_API = 'https://wcfifa26.onrender.com/api';
+
+const getApiUrl = (): string => {
+  // In the browser, always use the production API when on a Vercel domain
+  // This MUST come first to override any build-time env var baking
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host.includes('vercel.app') || host.includes('wcfifa')) {
+      return PRODUCTION_API;
+    }
+  }
+  // For local development or custom domains, use the env var
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
-  }
-  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return 'https://wcfifa26.onrender.com/api';
   }
   return 'http://localhost:4000/api';
 };

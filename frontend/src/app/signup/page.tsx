@@ -42,7 +42,15 @@ export default function SignupPage() {
       toast.success('Account created! Welcome to World Cup Fantasy 2026! 🏆');
       router.push('/dashboard');
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Signup failed. Please try again.';
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string; code?: string };
+      let msg = 'Signup failed. Please try again.';
+      if (axiosErr.response?.data?.message) {
+        msg = axiosErr.response.data.message;
+      } else if (axiosErr.code === 'ERR_NETWORK' || axiosErr.code === 'ECONNREFUSED') {
+        msg = 'Cannot connect to server. Please try again in a moment.';
+      } else if (axiosErr.message) {
+        msg = axiosErr.message;
+      }
       toast.error(msg);
     } finally {
       setIsLoading(false);

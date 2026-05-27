@@ -14,12 +14,18 @@ interface SocketData {
 export function initializeSocket(httpServer: HttpServer): void {
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: [
-        process.env.CLIENT_URL || 'http://localhost:3000',
-        'http://localhost:3000',
-        'https://wcfifa-26.vercel.app',
-        'https://wcfifa26.vercel.app',
-      ],
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (origin.endsWith('.vercel.app')) return callback(null, true);
+        const allowed = [
+          process.env.CLIENT_URL || 'http://localhost:3000',
+          'http://localhost:3000',
+          'https://wcfifa-26.vercel.app',
+          'https://wcfifa26.vercel.app',
+        ];
+        if (allowed.includes(origin)) return callback(null, true);
+        callback(null, false);
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },
