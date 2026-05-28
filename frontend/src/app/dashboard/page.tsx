@@ -56,10 +56,16 @@ export default function DashboardPage() {
     return () => { socket.off('score:update'); };
   }, [socket]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || dataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-        <div className="text-5xl animate-float">⚽</div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: 'var(--bg)' }}>
+        <div className="text-6xl animate-float">⚽</div>
+        <div className="flex gap-1.5 animate-pulse">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-bounce"
+              style={{ animationDelay: `${i * 0.15}s` }} />
+          ))}
+        </div>
       </div>
     );
   }
