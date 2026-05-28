@@ -6,7 +6,7 @@ interface AppError extends Error {
 }
 
 export function errorHandler(err: AppError, req: Request, res: Response, _next: NextFunction): void {
-  console.error(`[Error] ${req.method} ${req.path}:`, err.message);
+  console.error('[ErrorHandler]', err.message, err.stack);
 
   // Prisma unique constraint
   if (err.code === 'P2002') {
@@ -17,6 +17,18 @@ export function errorHandler(err: AppError, req: Request, res: Response, _next: 
   // Prisma not found
   if (err.code === 'P2025') {
     res.status(404).json({ success: false, message: 'Record not found.' });
+    return;
+  }
+
+  // JWT TokenExpiredError
+  if (err.name === 'TokenExpiredError') {
+    res.status(401).json({ success: false, message: 'Token expired' });
+    return;
+  }
+
+  // JWT JsonWebTokenError
+  if (err.name === 'JsonWebTokenError') {
+    res.status(401).json({ success: false, message: 'Invalid token' });
     return;
   }
 

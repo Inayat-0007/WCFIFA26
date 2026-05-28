@@ -23,8 +23,10 @@ export function getSocket(token?: string | null): Socket {
     socket = io(getSocketUrl(), {
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
+      reconnectionDelayMax: 30000,
+      randomizationFactor: 0.5,
       autoConnect: false,
       // Auth token is set dynamically before connect — see updateSocketAuth()
     });

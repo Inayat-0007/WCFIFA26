@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import webpush from 'web-push';
 import prisma from '../lib/prisma';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 // Initialize web-push with VAPID keys from environment
 const setupWebPush = () => {
@@ -15,16 +16,16 @@ const setupWebPush = () => {
   return false;
 };
 
-export const getVapidPublicKey = async (req: Request, res: Response): Promise<void> => {
+export const getVapidPublicKey = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   if (!publicKey || publicKey.startsWith('your_')) {
     res.status(404).json({ success: false, message: 'VAPID public key not configured' });
     return;
   }
   res.json({ success: true, publicKey });
-};
+});
 
-export const subscribe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const subscribe = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { endpoint, keys } = req.body;
 
@@ -53,9 +54,9 @@ export const subscribe = async (req: Request, res: Response, next: NextFunction)
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const sendTestNotification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const sendTestNotification = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const isConfigured = setupWebPush();
     if (!isConfigured) {
@@ -113,7 +114,7 @@ export const sendTestNotification = async (req: Request, res: Response, next: Ne
   } catch (err) {
     next(err);
   }
-};
+});
 
 // Helper function to send push notification to any user across the backend
 export const sendPushToUser = async (userId: string, title: string, body: string, url: string = '/dashboard'): Promise<boolean> => {

@@ -2,10 +2,11 @@ import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
 import { recalculateMatchPoints } from '../services/scoringEngine.service';
 import { emitScoreUpdate, emitMatchEvent } from '../sockets';
+import { asyncHandler } from '../middleware/asyncHandler';
 type EventType = 'GOAL' | 'ASSIST' | 'YELLOW_CARD' | 'RED_CARD' | 'PENALTY_MISS' | 'CLEAN_SHEET' | 'SUBSTITUTION';
 
 
-export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAllUsers = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -19,9 +20,9 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getAllLeagues = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAllLeagues = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const leagues = await prisma.league.findMany({
       include: {
@@ -34,9 +35,9 @@ export const getAllLeagues = async (req: Request, res: Response, next: NextFunct
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const updateMatchScore = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateMatchScore = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const { homeScore, awayScore, status, minute } = req.body;
@@ -62,9 +63,9 @@ export const updateMatchScore = async (req: Request, res: Response, next: NextFu
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const addMatchEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const addMatchEvent = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { matchId, playerId, type, minute, detail } = req.body;
 
@@ -119,9 +120,9 @@ export const addMatchEvent = async (req: Request, res: Response, next: NextFunct
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const updatePlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updatePlayer = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const { price, name, image } = req.body;
@@ -139,9 +140,9 @@ export const updatePlayer = async (req: Request, res: Response, next: NextFuncti
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const triggerScoreRecalc = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const triggerScoreRecalc = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { matchId } = req.params;
     await recalculateMatchPoints(matchId);
@@ -149,9 +150,9 @@ export const triggerScoreRecalc = async (req: Request, res: Response, next: Next
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getAdminStats = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAdminStats = asyncHandler(async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const [userCount, leagueCount, matchCount, liveCount] = await Promise.all([
       prisma.user.count(),
@@ -167,4 +168,4 @@ export const getAdminStats = async (_req: Request, res: Response, next: NextFunc
   } catch (err) {
     next(err);
   }
-};
+});

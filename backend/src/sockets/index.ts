@@ -43,6 +43,7 @@ export function initializeSocket(httpServer: HttpServer): void {
         socket.handshake.headers?.authorization?.replace('Bearer ', '');
 
       if (!token) {
+        socket.disconnect(true);
         return next(new Error('Authentication required — no token provided'));
       }
 
@@ -56,6 +57,7 @@ export function initializeSocket(httpServer: HttpServer): void {
 
       next();
     } catch {
+      socket.disconnect(true);
       next(new Error('Authentication failed — invalid or expired token'));
     }
   });

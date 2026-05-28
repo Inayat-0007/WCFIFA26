@@ -24,6 +24,8 @@ import userRoutes from './routes/user.routes';
 import neonAuthRoutes from './routes/neonAuth.routes';
 
 import { syncEventsForLiveMatches } from './services/footballApi.service';
+import { syncPlayerPrices } from './services/playerSync.service';
+import http from 'http';
 
 const app = express();
 const httpServer = createServer(app);
@@ -103,6 +105,24 @@ cron.schedule('* * * * *', async () => {
   }
 });
 
+// CRON: Update player prices daily at 03:00 UTC
+cron.schedule('0 3 * * *', async () => {
+  try {
+    await syncPlayerPrices();
+  } catch (e) {
+    console.error('[CRON] Player price sync failed:', e);
+  }
+});
+
+// Graceful error handlers
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err);
+  process.exit(1);
+});
+
 // ─── START SERVER ─────────────────────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || '4000', 10);
 httpServer.listen(PORT, '0.0.0.0', () => {
@@ -116,5 +136,11 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   ================================
   `);
 });
+
+// Keep-alive ping to prevent Render free tier sleep (every 14 minutes)
+setInterval(() => {
+  const url = `http://localhost:${PORT}/health`;
+  http.get(url, () => {}).on('error', () => {});
+}, 14 * 60 * 1000);
 
 export default app;

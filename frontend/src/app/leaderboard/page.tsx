@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
@@ -8,21 +8,40 @@ import { Navbar } from '@/components/ui/Navbar';
 import { getRankMedal } from '@/lib/utils';
 import api from '@/lib/api';
 import type { LeaderboardEntry } from '@/types';
+import { useSocket } from '@/context/SocketContext';
 
 export default function LeaderboardPage() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const [rankings, setRankings] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const { socket } = useSocket();
+
+  const fetchRankings = useCallback(() => {
+    if (!isAuthenticated) return;
+    api.get('/leaderboard/global?limit=50').then((res) => setRankings(res.data.data || [])).finally(() => setLoading(false));
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/login');
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    api.get('/leaderboard/global?limit=50').then((res) => setRankings(res.data.data || [])).finally(() => setLoading(false));
-  }, [isAuthenticated]);
+    fetchRankings();
+  }, [fetchRankings]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleUpdate = () => {
+      fetchRankings();
+    };
+    socket.on('leaderboard:update', handleUpdate);
+    socket.on('points:update', handleUpdate);
+    return () => {
+      socket.off('leaderboard:update', handleUpdate);
+      socket.off('points:update', handleUpdate);
+    };
+  }, [socket, fetchRankings]);
 
   const top3 = rankings.slice(0, 3);
   const rest = rankings.slice(3);

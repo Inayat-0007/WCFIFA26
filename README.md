@@ -57,10 +57,9 @@ cd frontend && npm run dev
 
 ### 5. Login
 
-| Account | Email | Password |
-|---|---|---|
-| Admin | admin@worldcupfantasy.com | Admin@2026! |
-| Demo | demo@worldcupfantasy.com | Demo@2026! |
+Default admin and demo accounts are created during seeding. Check your `backend/.env` for `ADMIN_EMAIL` and update passwords immediately after first login via the admin panel.
+
+> ⚠️ **Security**: Never commit credentials to version control. Rotate all default passwords before deploying to production.
 
 ## 📱 Features
 

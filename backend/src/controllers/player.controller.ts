@@ -1,9 +1,9 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler';
 type Position = 'GK' | 'DEF' | 'MID' | 'FWD';
 
-
-export const getAllPlayers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAllPlayers = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { position, country, search, page = '1', limit = '50', matchId } = req.query;
 
@@ -45,9 +45,9 @@ export const getAllPlayers = async (req: Request, res: Response, next: NextFunct
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getPlayer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getPlayer = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const player = await prisma.player.findUnique({
@@ -67,9 +67,9 @@ export const getPlayer = async (req: Request, res: Response, next: NextFunction)
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getPlayersByMatch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getPlayersByMatch = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { matchId } = req.params;
     const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -95,4 +95,4 @@ export const getPlayersByMatch = async (req: Request, res: Response, next: NextF
   } catch (err) {
     next(err);
   }
-};
+});

@@ -1,8 +1,8 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler';
 
-
-export const getAllMatches = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAllMatches = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { status, group, round, page = '1', limit = '20' } = req.query;
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
@@ -52,9 +52,9 @@ export const getAllMatches = async (req: Request, res: Response, next: NextFunct
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getMatch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMatch = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const match = await prisma.match.findUnique({
@@ -92,9 +92,9 @@ export const getMatch = async (req: Request, res: Response, next: NextFunction):
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getLiveMatches = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getLiveMatches = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const matches = await prisma.match.findMany({
       where: { status: 'LIVE' },
@@ -122,9 +122,9 @@ export const getLiveMatches = async (req: Request, res: Response, next: NextFunc
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getUpcomingMatches = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUpcomingMatches = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const matches = await prisma.match.findMany({
       where: { status: 'UPCOMING', kickoffTime: { gte: new Date() } },
@@ -150,4 +150,4 @@ export const getUpcomingMatches = async (req: Request, res: Response, next: Next
   } catch (err) {
     next(err);
   }
-};
+});

@@ -1,8 +1,8 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler';
 
-
-export const saveTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const saveTeam = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { matchId, playerIds, captainId, viceCaptainId } = req.body;
 
@@ -72,11 +72,28 @@ export const saveTeam = async (req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    // Validate position rules: must have at least 1 GK
+    // Validate position rules: must have exactly 1 GK
     const positions = players.map((p) => p.position);
     const gkCount = positions.filter((p) => p === 'GK').length;
     if (gkCount !== 1) {
       res.status(400).json({ success: false, message: 'Team must have exactly 1 Goalkeeper' });
+      return;
+    }
+
+    // Validate position distribution (covers all valid formations: 4-4-2, 4-3-3, 3-5-2, 3-4-3, 5-3-2)
+    const defCount = positions.filter((p) => p === 'DEF').length;
+    const midCount = positions.filter((p) => p === 'MID').length;
+    const fwdCount = positions.filter((p) => p === 'FWD').length;
+    if (defCount < 3 || defCount > 5) {
+      res.status(400).json({ success: false, message: 'Must have 3-5 defenders' });
+      return;
+    }
+    if (midCount < 3 || midCount > 5) {
+      res.status(400).json({ success: false, message: 'Must have 3-5 midfielders' });
+      return;
+    }
+    if (fwdCount < 1 || fwdCount > 3) {
+      res.status(400).json({ success: false, message: 'Must have 1-3 forwards' });
       return;
     }
 
@@ -132,9 +149,9 @@ export const saveTeam = async (req: Request, res: Response, next: NextFunction):
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getMyTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMyTeam = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { matchId } = req.params;
     const team = await prisma.fantasyTeam.findUnique({
@@ -162,4 +179,4 @@ export const getMyTeam = async (req: Request, res: Response, next: NextFunction)
   } catch (err) {
     next(err);
   }
-};
+});

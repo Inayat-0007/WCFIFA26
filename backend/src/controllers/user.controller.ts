@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
+import { asyncHandler } from '../middleware/asyncHandler';
 
-export const getUserAchievements = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserAchievements = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.user!.id;
 
@@ -32,9 +33,9 @@ export const getUserAchievements = async (req: Request, res: Response, next: Nex
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getUserHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserHistory = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.user!.id;
 
@@ -47,4 +48,4 @@ export const getUserHistory = async (req: Request, res: Response, next: NextFunc
   } catch (err) {
     next(err);
   }
-};
+});

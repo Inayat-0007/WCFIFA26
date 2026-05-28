@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { Toaster } from 'react-hot-toast';
 import { ScrollAndClickEffects } from '@/components/ui/ScrollAndClickEffects';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -47,28 +48,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${outfit.className} antialiased`}>
         <ThemeProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <SocketProvider>
-                <ScrollAndClickEffects />
-                {children}
-                <Toaster
-                  position="top-right"
-                  toastOptions={{
-                    style: {
-                      background: '#1A1A24',
-                      color: '#fff',
-                      border: '1px solid rgba(220, 20, 60, 0.3)',
-                      borderRadius: '12px',
-                      fontFamily: 'Outfit, sans-serif',
-                    },
-                    success: { iconTheme: { primary: '#FFD700', secondary: '#1A1A24' } },
-                    error: { iconTheme: { primary: '#DC143C', secondary: '#fff' } },
-                  }}
-                />
-              </SocketProvider>
-            </AuthProvider>
-          </QueryProvider>
+          <ErrorBoundary>
+            <QueryProvider>
+              <AuthProvider>
+                <SocketProvider>
+                  <ScrollAndClickEffects />
+                  {children}
+                  <Toaster
+                    position="top-right"
+                    toastOptions={{
+                      style: {
+                        background: '#1A1A24',
+                        color: '#fff',
+                        border: '1px solid rgba(220, 20, 60, 0.3)',
+                        borderRadius: '12px',
+                        fontFamily: 'Outfit, sans-serif',
+                      },
+                      success: { iconTheme: { primary: '#FFD700', secondary: '#1A1A24' } },
+                      error: { iconTheme: { primary: '#DC143C', secondary: '#fff' } },
+                    }}
+                  />
+                </SocketProvider>
+              </AuthProvider>
+            </QueryProvider>
+          </ErrorBoundary>
         </ThemeProvider>
       </body>
     </html>

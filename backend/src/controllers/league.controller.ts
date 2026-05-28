@@ -1,7 +1,7 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
 import { emitLeaderboardUpdate } from '../sockets';
-
+import { asyncHandler } from '../middleware/asyncHandler';
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -12,7 +12,7 @@ function generateInviteCode(): string {
   return code;
 }
 
-export const createLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createLeague = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name } = req.body;
     if (!name || name.trim().length < 3) {
@@ -52,9 +52,9 @@ export const createLeague = async (req: Request, res: Response, next: NextFuncti
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const joinLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const joinLeague = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { inviteCode } = req.body;
     if (!inviteCode) {
@@ -99,9 +99,9 @@ export const joinLeague = async (req: Request, res: Response, next: NextFunction
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getMyLeagues = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMyLeagues = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const memberships = await prisma.leagueMember.findMany({
       where: { userId: req.user!.id },
@@ -121,9 +121,9 @@ export const getMyLeagues = async (req: Request, res: Response, next: NextFuncti
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getLeague = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -155,9 +155,9 @@ export const getLeague = async (req: Request, res: Response, next: NextFunction)
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getLeagueLeaderboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getLeagueLeaderboard = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -188,9 +188,9 @@ export const getLeagueLeaderboard = async (req: Request, res: Response, next: Ne
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const leaveLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const leaveLeague = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const league = await prisma.league.findUnique({ where: { id } });
@@ -207,9 +207,9 @@ export const leaveLeague = async (req: Request, res: Response, next: NextFunctio
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const removeMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const removeMember = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id, userId } = req.params;
     const league = await prisma.league.findUnique({ where: { id } });
@@ -231,9 +231,9 @@ export const removeMember = async (req: Request, res: Response, next: NextFuncti
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const deleteLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteLeague = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const league = await prisma.league.findUnique({ where: { id } });
@@ -250,4 +250,4 @@ export const deleteLeague = async (req: Request, res: Response, next: NextFuncti
   } catch (err) {
     next(err);
   }
-};
+});

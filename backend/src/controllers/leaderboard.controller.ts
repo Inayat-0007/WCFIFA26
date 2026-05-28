@@ -1,8 +1,8 @@
 import prisma from '../lib/prisma';
 import { Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler';
 
-
-export const getGlobalLeaderboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getGlobalLeaderboard = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { page = '1', limit = '50' } = req.query;
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
@@ -35,9 +35,9 @@ export const getGlobalLeaderboard = async (req: Request, res: Response, next: Ne
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getMatchLeaderboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMatchLeaderboard = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { matchId } = req.params;
 
@@ -62,9 +62,9 @@ export const getMatchLeaderboard = async (req: Request, res: Response, next: Nex
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const getLeagueLeaderboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getLeagueLeaderboard = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { leagueId } = req.params;
 
@@ -95,4 +95,4 @@ export const getLeagueLeaderboard = async (req: Request, res: Response, next: Ne
   } catch (err) {
     next(err);
   }
-};
+});

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../auth/jwt';
 import { body, validationResult } from 'express-validator';
-
+import { asyncHandler } from '../middleware/asyncHandler';
 
 export const validateRegister = [
   body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name must be 2-50 characters'),
@@ -16,7 +16,7 @@ export const validateLogin = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
-export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const register = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -51,9 +51,9 @@ export const register = async (req: Request, res: Response, next: NextFunction):
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const login = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -81,16 +81,16 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const googleCallback = async (req: Request, res: Response): Promise<void> => {
+export const googleCallback = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const user = req.user as Express.User;
   const token = generateToken(user.id, user.email, user.isAdmin);
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   res.redirect(`${clientUrl}/auth/callback?token=${token}`);
-};
+});
 
-export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMe = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
@@ -108,9 +108,9 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
   } catch (err) {
     next(err);
   }
-};
+});
 
-export const updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateProfile = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name, avatar } = req.body;
     const user = await prisma.user.update({
@@ -125,4 +125,4 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
   } catch (err) {
     next(err);
   }
-};
+});
