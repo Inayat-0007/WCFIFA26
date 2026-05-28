@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useSocket } from '@/context/SocketContext';
 
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -22,11 +23,46 @@ const NAV_LINKS = [
 export function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { connected, reconnecting } = useSocket();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
+      {/* Real-time Connection Status Banner */}
+      <AnimatePresence>
+        {reconnecting && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="w-full text-center py-2 text-xs font-bold text-white flex items-center justify-center gap-2 select-none"
+            style={{
+              background: 'linear-gradient(90deg, #F59E0B, #D97706)',
+              boxShadow: '0 2px 8px rgba(217, 119, 6, 0.2)',
+            }}
+          >
+            <div className="w-2 h-2 rounded-full bg-white animate-ping" />
+            <span>Connection lost. Attempting to reconnect...</span>
+          </motion.div>
+        )}
+        {!connected && !reconnecting && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="w-full text-center py-2 text-xs font-bold text-white flex items-center justify-center gap-2 select-none"
+            style={{
+              background: 'linear-gradient(90deg, #DC143C, #B91C1C)',
+              boxShadow: '0 2px 8px rgba(220, 20, 60, 0.2)',
+            }}
+          >
+            <div className="w-2 h-2 rounded-full bg-white" />
+            <span>Disconnected from live updates. Check your internet connection.</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <nav className="sticky top-0 z-50 border-b" style={{
         background: 'var(--nav-bg)',
         backdropFilter: 'blur(20px)',

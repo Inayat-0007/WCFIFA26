@@ -5,8 +5,6 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import passport from 'passport';
-import cron from 'node-cron';
-
 import { setupPassport } from './auth/jwt';
 import { initializeSocket } from './sockets';
 import { errorHandler } from './middleware/errorHandler.middleware';
@@ -23,8 +21,7 @@ import notificationRoutes from './routes/notification.routes';
 import userRoutes from './routes/user.routes';
 import neonAuthRoutes from './routes/neonAuth.routes';
 
-import { syncEventsForLiveMatches } from './services/footballApi.service';
-import { syncPlayerPrices } from './services/playerSync.service';
+import { setupCronJobs } from './services/cron.service';
 import http from 'http';
 
 const app = express();
@@ -94,25 +91,8 @@ initializeSocket(httpServer);
 // ─── ERROR HANDLER (must be last) ────────────────────────────────────────────
 app.use(errorHandler);
 
-// ─── CRON: Sync live match data every 60 seconds ─────────────────────────────
-cron.schedule('* * * * *', async () => {
-  if (process.env.FOOTBALL_API_KEY) {
-    try {
-      await syncEventsForLiveMatches();
-    } catch {
-      // Silently fail cron, don't crash server
-    }
-  }
-});
-
-// CRON: Update player prices daily at 03:00 UTC
-cron.schedule('0 3 * * *', async () => {
-  try {
-    await syncPlayerPrices();
-  } catch (e) {
-    console.error('[CRON] Player price sync failed:', e);
-  }
-});
+// ─── CRON SCHEDULER ───────────────────────────────────────────────────────────
+setupCronJobs();
 
 // Graceful error handlers
 process.on('unhandledRejection', (reason) => {

@@ -111,21 +111,23 @@ export const saveTeam = asyncHandler(async (req: Request, res: Response, next: N
 
     let team;
     if (existingTeam) {
-      // Update: delete old players first
-      await prisma.teamPlayer.deleteMany({ where: { fantasyTeamId: existingTeam.id } });
-      team = await prisma.fantasyTeam.update({
-        where: { id: existingTeam.id },
-        data: {
-          captainId,
-          viceCaptainId,
-          budgetUsed: Math.round(totalCost * 10) / 10,
-          teamPlayers: {
-            create: playerIds.map((pid: string) => ({ playerId: pid })),
+      team = await prisma.$transaction(async (tx) => {
+        // Update: delete old players first
+        await tx.teamPlayer.deleteMany({ where: { fantasyTeamId: existingTeam.id } });
+        return await tx.fantasyTeam.update({
+          where: { id: existingTeam.id },
+          data: {
+            captainId,
+            viceCaptainId,
+            budgetUsed: Math.round(totalCost * 10) / 10,
+            teamPlayers: {
+              create: playerIds.map((pid: string) => ({ playerId: pid })),
+            },
           },
-        },
-        include: {
-          teamPlayers: { include: { player: true } },
-        },
+          include: {
+            teamPlayers: { include: { player: true } },
+          },
+        });
       });
     } else {
       team = await prisma.fantasyTeam.create({
