@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, googleCallback, getMe, updateProfile, validateRegister, validateLogin } from '../controllers/auth.controller';
+import { register, login, googleCallback, getMe, updateProfile, forgotPassword, resetPassword, validateRegister, validateLogin, validateResetPassword } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { authLimiter } from '../middleware/rateLimit.middleware';
 import passport from 'passport';
@@ -8,6 +8,8 @@ const router = Router();
 
 router.post('/register', authLimiter, validateRegister, register);
 router.post('/login', authLimiter, validateLogin, login);
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password', authLimiter, validateResetPassword, resetPassword);
 router.get('/me', authenticate, getMe);
 router.put('/profile', authenticate, updateProfile);
 

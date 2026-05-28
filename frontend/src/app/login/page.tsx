@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import api from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
@@ -19,8 +20,80 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Forgot / Reset Password state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isForgotLoading, setIsForgotLoading] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [tempToken, setTempToken] = useState('');
+  const [resetPasswordVal, setResetPasswordVal] = useState('');
+  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [demoLink, setDemoLink] = useState('');
+
+  // Check for reset token in URL on load
+  useEffect(() => {
+    const token = searchParams?.get('resetToken');
+    if (token) {
+      setResetToken(token);
+      setShowForgotModal(true);
+    }
+  }, [searchParams]);
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error('Email is required');
+      return;
+    }
+    setIsForgotLoading(true);
+    setDemoLink('');
+    try {
+      const res = await api.post('/auth/forgot-password', { email: forgotEmail });
+      toast.success('Reset link generated!');
+      if (res.data?.data?.resetLink) {
+        setDemoLink(res.data.data.resetLink);
+        setTempToken(res.data.data.resetToken);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to generate reset link');
+    } finally {
+      setIsForgotLoading(false);
+    }
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPasswordVal) {
+      toast.error('Password is required');
+      return;
+    }
+    if (resetPasswordVal.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+    setIsResetLoading(true);
+    try {
+      await api.post('/auth/reset-password', {
+        token: resetToken,
+        password: resetPasswordVal,
+      });
+      toast.success('Password updated successfully! Please log in.');
+      setResetToken('');
+      setTempToken('');
+      setShowForgotModal(false);
+      setResetPasswordVal('');
+      setDemoLink('');
+      router.replace('/login');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Password reset failed');
+    } finally {
+      setIsResetLoading(false);
+    }
+  };
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -101,6 +174,17 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {errors.password && <p className="mt-1.5 text-xs" style={{ color: 'var(--accent)' }}>{errors.password.message}</p>}
+                <div className="flex justify-between items-center mt-2 select-none">
+                  <span />
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(true)}
+                    className="text-xs font-bold transition-colors hover:underline"
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
               </div>
 
               <button id="login-submit" type="submit" disabled={isLoading} className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2 rounded-xl disabled:opacity-60">
@@ -133,6 +217,112 @@ export default function LoginPage() {
           </p>
         </motion.div>
       </div>
+
+      {/* Forgot / Reset Password Modal */}
+      {(showForgotModal || resetToken) && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/60 z-50 backdrop-blur-md transition-opacity duration-300"
+            onClick={() => {
+              setShowForgotModal(false);
+              setResetToken('');
+              setTempToken('');
+              setDemoLink('');
+            }}
+          />
+          <div
+            className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md mx-4 card p-6 sm:p-8 animate-float"
+            style={{ background: 'var(--card-bg)', borderColor: 'var(--border)', color: 'var(--text)' }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-display font-black text-xl">
+                {resetToken ? 'Reset Password' : 'Forgot Password'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowForgotModal(false);
+                  setResetToken('');
+                  setTempToken('');
+                  setDemoLink('');
+                }}
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {resetToken ? (
+              <form onSubmit={handleResetSubmit} className="space-y-5">
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  Your password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.
+                </p>
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={resetPasswordVal}
+                      onChange={(e) => setResetPasswordVal(e.target.value)}
+                      className="input"
+                      required
+                    />
+                  </div>
+                </div>
+                <button type="submit" disabled={isResetLoading} className="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2 rounded-xl disabled:opacity-60">
+                  {isResetLoading ? 'Updating...' : 'Update Password'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleForgotSubmit} className="space-y-5">
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  Enter your email address and we will generate a password reset link for your account.
+                </p>
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      className="input"
+                      required
+                    />
+                  </div>
+                </div>
+                <button type="submit" disabled={isForgotLoading} className="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2 rounded-xl disabled:opacity-60">
+                  {isForgotLoading ? 'Generating Link...' : 'Generate Reset Link'}
+                </button>
+
+                {demoLink && (
+                  <div className="mt-4 p-4 rounded-xl border border-dashed text-center" style={{ background: 'var(--primary-glow)', borderColor: 'rgba(16,185,129,0.3)' }}>
+                    <p className="text-xs font-bold mb-3" style={{ color: 'var(--primary)' }}>
+                      [DEMO MODE] Reset link generated successfully!
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetToken(tempToken);
+                      }}
+                      className="w-full py-2.5 rounded-lg text-xs font-bold text-white uppercase tracking-wider transition-all duration-200"
+                      style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))' }}
+                    >
+                      Reset Password Now
+                    </button>
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
+        </>
+      )}
     </main>
   );
 }
